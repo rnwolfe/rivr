@@ -2,7 +2,8 @@
 // Exit codes are a contract: distinct, documented, and append-only. See contract.md §4.
 package errs
 
-// Stable exit codes. rivr additions over the base table: ExitUnsupported (11).
+// Stable exit codes. rivr additions over the base table: ExitUpstream (9),
+// ExitUnsupported (11).
 const (
 	ExitOK              = 0
 	ExitGeneric         = 1
@@ -11,8 +12,9 @@ const (
 	ExitAuth            = 4
 	ExitNotFound        = 5
 	ExitPerm            = 6 // permission denied OR ASSOCIATE_NOT_ELIGIBLE (official backend)
-	ExitRate            = 7 // provider quota exhausted / official TPS limit
-	ExitRetry           = 8
+	ExitRate            = 7 // provider quota exhausted / official TPS limit / blocked
+	ExitRetry           = 8 // transient upstream (5xx/network); safe to retry
+	ExitUpstream        = 9 // upstream returned something we couldn't classify/parse (rivr addition)
 	ExitConfig          = 10
 	ExitUnsupported     = 11 // capability not supported by the active provider (rivr addition)
 	ExitMutationBlocked = 12 // present for contract uniformity; rivr is read-only (never returned)
@@ -32,6 +34,7 @@ func Table() map[string]int {
 		"permission":        ExitPerm,
 		"rate_limited":      ExitRate,
 		"retryable":         ExitRetry,
+		"upstream_error":    ExitUpstream,
 		"config_error":      ExitConfig,
 		"unsupported":       ExitUnsupported,
 		"mutation_blocked":  ExitMutationBlocked,
@@ -41,12 +44,14 @@ func Table() map[string]int {
 }
 
 // CLIError is a structured error carrying a machine-readable code, a remediation hint,
-// and the process exit code to return.
+// and the process exit code to return. RetryAfter (seconds) is surfaced to agents when the
+// upstream tells us when to retry (Retry-After header, throttle cooldown).
 type CLIError struct {
 	Message     string
 	Code        string
 	Remediation string
 	Exit        int
+	RetryAfter  int // seconds; 0 = unset
 }
 
 func (e *CLIError) Error() string { return e.Message }
@@ -54,6 +59,39 @@ func (e *CLIError) Error() string { return e.Message }
 // New constructs a CLIError.
 func New(exit int, code, msg, remediation string) *CLIError {
 	return &CLIError{Message: msg, Code: code, Remediation: remediation, Exit: exit}
+}
+
+// WithRetryAfter annotates an error with a retry delay (seconds) for the agent to schedule.
+func (e *CLIError) WithRetryAfter(seconds int) *CLIError {
+	e.RetryAfter = seconds
+	return e
+}
+
+// Retryable marks a transient upstream failure (5xx / network) that is safe to retry.
+func Retryable(provider, detail string) *CLIError {
+	return New(ExitRetry, "RETRYABLE", "transient failure from "+provider+": "+detail,
+		"retry the request; if it persists, run `rivr doctor`")
+}
+
+// Upstream is returned when the provider responds with something we can't classify.
+func Upstream(provider, detail string) *CLIError {
+	return New(ExitUpstream, "UPSTREAM_ERROR", "unexpected response from "+provider+": "+detail,
+		"retry; if it persists the provider API may have changed — please file an issue")
+}
+
+// SchemaDrift is returned when an expected field/container is absent from the response,
+// so an upstream rename surfaces as a typed error instead of a silent empty result.
+func SchemaDrift(provider, field string) *CLIError {
+	return New(ExitUpstream, "SCHEMA_DRIFT",
+		provider+" response is missing expected field "+field,
+		"the provider's response shape may have changed; update rivr or file an issue")
+}
+
+// Blocked is returned when a (scraping) target has blocked us; carries a cooldown.
+func Blocked(provider string, retryAfter int) *CLIError {
+	return New(ExitRate, "BLOCKED", provider+" blocked the request (bot detection)",
+		"wait for the cooldown and retry, or use an API-based provider (--provider serpapi)").
+		WithRetryAfter(retryAfter)
 }
 
 // MutationBlocked is returned when a mutating op runs without --allow-mutations. rivr is

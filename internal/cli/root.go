@@ -205,18 +205,25 @@ func emitError(rt *Runtime, err error) int {
 		ce = errs.New(errs.ExitGeneric, "INTERNAL", err.Error(), "")
 	}
 	if rt.Out.Format == output.FormatJSON {
-		enc := json.NewEncoder(rt.Out.Stderr)
-		enc.SetEscapeHTML(false)
-		enc.SetIndent("", "  ")
-		_ = enc.Encode(map[string]any{
+		body := map[string]any{
 			"error":       ce.Message,
 			"code":        ce.Code,
 			"remediation": ce.Remediation,
-		})
+		}
+		if ce.RetryAfter > 0 {
+			body["retryAfterSeconds"] = ce.RetryAfter
+		}
+		enc := json.NewEncoder(rt.Out.Stderr)
+		enc.SetEscapeHTML(false)
+		enc.SetIndent("", "  ")
+		_ = enc.Encode(body)
 	} else {
 		fmt.Fprintf(rt.Out.Stderr, "error: %s\n", ce.Message)
 		if ce.Code != "" {
 			fmt.Fprintf(rt.Out.Stderr, "  code: %s\n", ce.Code)
+		}
+		if ce.RetryAfter > 0 {
+			fmt.Fprintf(rt.Out.Stderr, "  retry after: %ds\n", ce.RetryAfter)
 		}
 		if ce.Remediation != "" {
 			fmt.Fprintf(rt.Out.Stderr, "  fix:  %s\n", ce.Remediation)
