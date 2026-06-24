@@ -84,6 +84,9 @@ func (rt *Runtime) Provider() (provider.Provider, error) {
 			"unknown provider "+name, "run `rivr provider list` to see configured backends")
 	}
 	if !p.Configured() {
+		if u, ok := p.(provider.Unconfigured); ok {
+			return nil, u.UnconfiguredErr() // backend-specific guidance (e.g. scrape opt-in)
+		}
 		return nil, errs.AuthRequired(p.Name())
 	}
 	// Inject the resolved Associates tag into backends that need it (official Creators API

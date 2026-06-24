@@ -156,6 +156,13 @@ type Provider interface {
 	GetBrowseNode(ctx context.Context, nodeID string) (*BrowseNode, error)
 }
 
+// Unconfigured lets a backend supply its own "not configured" error instead of the generic
+// AUTH_REQUIRED — e.g. the scrape backend is opt-in, not key-based, so it explains how to
+// enable it rather than telling you to pipe a nonexistent API key.
+type Unconfigured interface {
+	UnconfiguredErr() error
+}
+
 // TagAware is implemented by backends that need the resolved Amazon Associates tag
 // injected (the official Creators API requires partnerTag on every request). The CLI
 // runtime calls SetPartnerTag before dispatching a command.

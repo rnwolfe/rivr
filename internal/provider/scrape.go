@@ -31,6 +31,9 @@ func (s *scrape) Capabilities() []string {
 // Configured is true only when the user has explicitly opted in.
 func (s *scrape) Configured() bool { return scrapeEnabled() }
 
+// UnconfiguredErr explains the opt-in instead of a misleading "pipe an API key" message.
+func (s *scrape) UnconfiguredErr() error { return s.disabled() }
+
 func scrapeEnabled() bool {
 	return os.Getenv("RIVR_SCRAPE_ENABLE") == "1"
 }
