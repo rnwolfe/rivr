@@ -89,10 +89,4 @@ func (c *creators) Validate(ctx context.Context) error {
 // stub: always valid (offline backend).
 func (s *stub) Validate(_ context.Context) error { return nil }
 
-// scrape: valid only when explicitly enabled.
-func (s *scrape) Validate(_ context.Context) error {
-	if !scrapeEnabled() {
-		return s.disabled()
-	}
-	return nil
-}
+// scrape.Validate lives in scrape.go (it gates on the opt-in flag).

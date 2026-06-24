@@ -35,14 +35,15 @@ Amazon Creators API.
 - `rivr browse <node-id> --json` — category (browse-node) tree. **Creators backend only.**
 
 ### Provider capability matrix
-| capability | serpapi (default) | rainforest | creators | scrape |
+| capability | serpapi (default) | rainforest | creators | scrape (opt-in) |
 |---|---|---|---|---|
-| search/item/offers/variations | ✓ | ✓ | ✓ | gated |
-| reviews | ✓ (sample) | ✓ (full) | ✗ | gated |
-| browse | ✗ | ✗ | ✓ | gated |
+| search / item / offers | ✓ | ✓ | ✓ | ✓ |
+| reviews | ✓ (sample) | ✓ (full) | ✗ | ✓ (full) |
+| variations | ✓ | ✓ | ✓ | ✗ |
+| browse | ✗ | ✗ | ✓ | ✗ |
 
 A capability the active backend lacks returns `UNSUPPORTED_BY_PROVIDER` — switch with
-`--provider`.
+`--provider`. `scrape` is keyless but OFF by default (see below).
 
 ## Deep links & affiliate attribution
 rivr is read-only: every result carries a canonical `url` deep link to amazon.com — the
@@ -71,8 +72,11 @@ Getting a token (one-time, out of band — both you and the agent are blocked un
   The partner/Associates tag is taken from `--associate-tag` (or the built-in default).
   Override gated-portal endpoints if needed: `RIVR_CREATORS_TOKEN_URL`,
   `RIVR_CREATORS_API_HOST`, `RIVR_CREATORS_MARKETPLACE`.
-- **scrape**: OFF by default (Amazon ToS + bot detection). `RIVR_SCRAPE_ENABLE=1` to opt in;
-  ships no selectors.
+- **scrape** (keyless): OFF by default. `RIVR_SCRAPE_ENABLE=1` to opt in. Intended for an
+  agent/user on a **residential** connection at home (modest, throttled requests look like a
+  shopper). **Do NOT use from cloud/hosted/datacenter IPs** — you'll be blocked; use the
+  official Creators backend there. Carries Amazon ToS risk and breaks when Amazon changes its
+  DOM (failures surface as `SCHEMA_DRIFT` or `BLOCKED`, the latter with a persistent cooldown).
 
 `rivr auth status --json` actively tests the active provider (token redacted) and exits
 non-zero on problems. `rivr auth logout` removes LOCAL creds only. `rivr auth refresh`

@@ -52,9 +52,12 @@ a **disclosed, opt-out-able built-in default** (the "sponsorware" model):
   2. **Official Amazon Creators API (optional)** — `affiliate-program.amazon.com/creatorsapi`.
      Successor to PA-API 5.0. Four operations (search/getItems/getBrowseNodes/getVariations),
      OAuth 2.0 client-credentials auth. **Gated** (see ToS/risk).
-  3. **DIY scraping of amazon.com (advanced opt-in, NOT default)** — documented as a
-     last-resort provider; high breakage + bot-detection + ToS risk. Off unless explicitly
-     selected.
+  3. **DIY scraping of amazon.com (keyless, opt-in, NOT default)** — `RIVR_SCRAPE_ENABLE=1`.
+     Implemented (goquery selectors for search/item/offers/reviews; variations/browse not
+     parsed). Intended for an agent/user on a **residential** connection at home; **hosted/
+     cloud/datacenter deployments must use the official `creators` backend instead** (scraping
+     from datacenter IPs is reliably blocked). High breakage + bot-detection + ToS risk;
+     captcha/block pages → `BLOCKED` with a persistent cooldown so the next process fails fast.
 - **Rate limits / pagination**:
   - *Third-party*: per-provider, credit/quota based (e.g. SerpApi free 250/mo, $25/mo →
     1,000; Rainforest ~$23/mo → 500 credits). API returns quota headers; surface them.
@@ -75,8 +78,9 @@ a **disclosed, opt-out-able built-in default** (the "sponsorware" model):
     (treat as sensitive). Verify review-pagination depth per provider — common gap.
   - **DIY scraping**: Amazon Conditions of Use prohibit robots/scrapers; 2026 bot detection
     (AWS WAF Bot Control + TLS/JA3 fingerprinting + a March-2026 BSA update reportedly
-    targeting agentic crawlers). "Robot Check" pages return HTTP 200 (silent garbage). High
-    breakage (per-session A/B DOMs). Advanced opt-in only; loud warnings.
+    targeting agentic crawlers). "Robot Check" pages are detected (captcha markers / 429 /
+    503) and mapped to `BLOCKED` + a persisted cooldown rather than returning garbage. High
+    breakage (per-session A/B DOMs). Opt-in + residential-only; loud warnings; hosted → official.
   - **Official API data gap**: NO customer-review *text* and no reliable star-rating/review-
     count return (never re-added after PA-API 4→5). Review text/ratings ⇒ third-party only.
 - **Prior art / competitive landscape**:

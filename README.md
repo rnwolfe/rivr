@@ -55,7 +55,7 @@ fallback (`RIVR_KEYRING=file` forces it on headless boxes).
 | **serpapi** (default) | sign up → [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key) → `printf %s "$KEY" \| rivr auth login --provider serpapi` | renewing free tier (~250/mo); reviews are a page **sample** |
 | **rainforest** | [Traject Data](https://trajectdata.com/) dashboard → `printf %s "$KEY" \| rivr auth login --provider rainforest` | **full** paginated reviews + real offers |
 | **creators** (official) | Associates Central → Tools → Creators API → `printf '%s\n%s' "$ID" "$SECRET" \| rivr auth login --provider creators` | needs an approved Associate w/ ≥10 sales/30d, else `ASSOCIATE_NOT_ELIGIBLE`; no review text |
-| **scrape** | `RIVR_SCRAPE_ENABLE=1` (opt-in) | OFF by default — Amazon ToS + bot detection; ships no selectors |
+| **scrape** (keyless) | `RIVR_SCRAPE_ENABLE=1` (opt-in) | for **home/residential** use only — modest throttled requests; ToS risk + fragile. Don't run from cloud/hosted IPs (→ use `creators`). |
 
 `rivr auth status --json` tests the active provider; `rivr doctor --json` runs full
 diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the login command.
