@@ -35,20 +35,23 @@ checksum:
 sboms:
   - artifacts: archive
 
-homebrew_casks:
-  - repository:
-      owner: rnwolfe
-      name: homebrew-tap
-      token: "{{ .Env.GORELEASER_TOKEN }}"
-    homepage: "https://github.com/rnwolfe/rivr"
-    description: "Agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."
-    # Unsigned binaries are Gatekeeper-quarantined on macOS; strip the attribute on install.
-    hooks:
-      post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"]
-          end
+# Homebrew cask: enabled once the `rnwolfe/homebrew-tap` repo + GORELEASER_TOKEN secret
+# exist (see README install + the cli-publish hand-back). Until then the release ships
+# `go install` + downloadable binaries + checksums + SBOM + provenance. To enable, uncomment
+# and ensure the token has write access to the tap repo.
+# homebrew_casks:
+#   - repository:
+#       owner: rnwolfe
+#       name: homebrew-tap
+#       token: "{{ .Env.GORELEASER_TOKEN }}"
+#     homepage: "https://github.com/rnwolfe/rivr"
+#     description: "Agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."
+#     hooks:
+#       post:
+#         install: |
+#           if OS.mac?
+#             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"]
+#           end
 
 release:
   draft: false

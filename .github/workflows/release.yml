@@ -28,8 +28,9 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}
 
+      # SLSA build provenance. attest-build-provenance fails on private user repos, so guard it.
       - uses: actions/attest-build-provenance@v3
+        if: ${{ !github.event.repository.private }}
         with:
           subject-path: "dist/*.tar.gz"
