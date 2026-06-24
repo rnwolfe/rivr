@@ -13,10 +13,10 @@ canonical `/dp/<ASIN>` deep link.
 ```bash
 # Go (any platform; static binary, no CGO)
 go install github.com/rnwolfe/rivr/cmd/rivr@latest
-
-# Homebrew (after first release)
-brew install rnwolfe/tap/rivr
 ```
+
+Or download a prebuilt binary from [Releases](https://github.com/rnwolfe/rivr/releases)
+(checksums + SBOM + provenance included). _A Homebrew tap is planned._
 
 ## First result in <60s (no account)
 
