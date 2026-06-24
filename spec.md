@@ -160,7 +160,7 @@ no command consumes it; the tool is structurally read-only.
 | `rivr search <query>` | read | Keyword/category product search (filters: `--category`, `--min-rating`, `--prime`, `--min-price`/`--max-price`, `--sort`). | `items[]{asin,title*,price,currency,rating,reviewCount,prime,url,image}`, `nextCursor`, `provider` |
 | `rivr item get <asin...>` | read | Full product detail for one or more ASINs (`--detailed` adds bullets/specs). | `asin,title*,brand,price,currency,offers,features*[],description*,images[],rating,reviewCount,salesRank,url` |
 | `rivr item offers <asin>` | read | Live offers / buybox / price / availability (OffersV2-style). | `offers[]{price,currency,condition,merchant,prime,availability}`, `buyboxPrice` |
-| `rivr reviews <asin>` | read | Customer reviews (text + rating). **Third-party providers only**; on official/scrape backends returns a structured `UNSUPPORTED_BY_PROVIDER` error. | `reviews[]{rating,title*,body*,author,date,verified}`, `nextCursor` |
+| `rivr reviews <asin>` | read | Customer reviews (text + rating). **Third-party providers only**; on official/scrape backends returns a structured `UNSUPPORTED_BY_PROVIDER` error. Carries `scope` (`full` = Rainforest paginated, `sample` = SerpApi page sample). | `scope`, `reviews[]{rating,title*,body*,author,date,verified}`, `nextCursor` |
 | `rivr variations <asin>` | read | Size/color/style variations of a parent product. | `parentAsin,variations[]{asin,attributes,price,url}` |
 | `rivr browse <node-id>` | read | Browse-node (category) tree metadata. *(Official Creators backend; degrade gracefully on providers without it.)* | `nodeId,name,ancestors[],children[]` |
 | `rivr provider list` | read | Configured providers + which is default + auth status of each. | `providers[]{name,configured,default,capabilities}` |
@@ -174,15 +174,18 @@ Start from contract §4; target-specific additions in **bold**.
 0   ok                      5  not found (bad/unknown ASIN or node)
 1   generic error           6  permission denied / **ELIGIBILITY (AssociateNotEligible)**
 2   usage/parse             7  **RATE_LIMITED / quota exhausted (provider or official)**
-3   empty results (search   8  retryable/transient (upstream 5xx, network)
-    returned 0 matches)     10 config error (no provider configured / bad default)
-4   auth required           **11 UNSUPPORTED_BY_PROVIDER (e.g. reviews on official backend)**
-   (missing/invalid key)    13 input required (--no-input hit a prompt)
+3   empty results (search   8  retryable/transient (upstream 5xx, network; auto-retried)
+    returned 0 matches)     **9  UPSTREAM_ERROR / SCHEMA_DRIFT (unclassifiable/changed response)**
+4   auth required           10 config error (no provider configured / bad default)
+   (missing/invalid key)    **11 UNSUPPORTED_BY_PROVIDER (e.g. reviews on official backend)**
+                            13 input required (--no-input hit a prompt)
                             130 cancelled (SIGINT)
 ```
 Note: code **6** carries two distinct `code` strings in the JSON error body —
 `PERMISSION_DENIED` and `ASSOCIATE_NOT_ELIGIBLE` (latter remediation → Associates dashboard).
-`3` (empty results) is a success-adjacent signal, never collapsed into `5`/`1`.
+Code **7** (`RATE_LIMITED`/`BLOCKED`) and `BLOCKED` carry `retryAfterSeconds`; rivr also
+records a persistent cooldown so the next process fails fast. `3` (empty results) is a
+success-adjacent signal, never collapsed into `5`/`1`.
 
 ## Output schema
 Single **provider-normalized** shape; `schemaVersion` field; append-only. Free-text fields
@@ -209,7 +212,7 @@ carry the untrusted-fence wrapper in agent mode.
   "images": [ … ], "rating": 4.6, "reviewCount": 21034, "salesRank": 142, "url": "…" }
 
 // rivr reviews
-{ "schemaVersion": "1", "provider": "...", "asin": "...",
+{ "schemaVersion": "1", "provider": "...", "asin": "...", "scope": "full|sample",
   "reviews": [ { "rating": 5, "title": "…", "body": "…", "author": "…",
                  "date": "2026-05-01", "verified": true } ],
   "nextCursor": null }

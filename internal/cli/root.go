@@ -143,13 +143,31 @@ func (rt *Runtime) Link(u string) string {
 	return u + sep + "tag=" + url.QueryEscape(tag)
 }
 
+// rootHelp leads with runnable examples (contract §5: example-led help), then the synopsis.
+const rootHelp = `An agent-friendly CLI for Amazon Shopping search and data retrieval (read-only).
+
+EXAMPLES:
+  # one-time auth (key read from stdin, never argv); default backend is serpapi
+  printf %s "$SERPAPI_KEY" | rivr auth login --provider serpapi
+
+  rivr search "usb-c cable" --json
+  rivr search "coffee maker" --prime --min-rating 4 --json
+  rivr item get B0XXXXXXX --detailed --json
+  rivr item offers B0XXXXXXX --json
+  rivr reviews B0XXXXXXX --provider rainforest --json   # full reviews
+  rivr provider list --json
+  rivr doctor --json
+
+Read-only: every result is structured data plus a canonical /dp/<ASIN> deep link.
+See 'rivr agent' for the full agent contract, 'rivr schema' for the machine-readable spec.`
+
 // Run parses args and dispatches, returning the process exit code.
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	var cfg CLI
 	helpShown := false
 	parser, err := kong.New(&cfg,
 		kong.Name("rivr"),
-		kong.Description("An agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."),
+		kong.Description(rootHelp),
 		kong.Writers(stdout, stderr),
 		kong.Exit(func(int) { helpShown = true }), // --help/--version: we control exit
 	)
@@ -187,6 +205,10 @@ func newRuntime(cfg *CLI, stdin io.Reader, stdout, stderr io.Writer) *Runtime {
 	w := &output.Writer{
 		Stdout: stdout, Stderr: stderr,
 		Format: format, Color: color, Limit: cfg.Limit, Select: sel,
+	}
+	// Conflicting affiliate flags: --no-associate-tag wins; say so rather than resolve silently.
+	if cfg.AssociateTag != "" && cfg.NoAssociateTag {
+		w.Info("note: both --associate-tag and --no-associate-tag set; --no-associate-tag wins (attribution disabled)")
 	}
 	return &Runtime{Cfg: cfg, Out: w, Stdin: stdin, Ctx: context.Background()}
 }

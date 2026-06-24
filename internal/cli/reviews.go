@@ -28,6 +28,10 @@ func (c *ReviewsCmd) Run(rt *Runtime) error {
 	if len(res.Reviews) == 0 {
 		return errs.Empty("reviews")
 	}
+	// Make the partial-results signal visible on the human/stderr path too (it's also in JSON).
+	if res.Scope == "sample" {
+		rt.Out.Info("note: sample reviews only (provider %s); use --provider rainforest for the full set", p.Name())
+	}
 	if rt.Cfg.Limit > 0 && len(res.Reviews) > rt.Cfg.Limit {
 		rt.Out.Info("note: %d reviews truncated to --limit=%d (page with --cursor)", len(res.Reviews), rt.Cfg.Limit)
 		res.Reviews = res.Reviews[:rt.Cfg.Limit]
