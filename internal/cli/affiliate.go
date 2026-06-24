@@ -10,8 +10,7 @@ package cli
 // access). It is fully disclosed (visible in every URL, in `doctor`, in `schema`, and in the
 // docs), replaceable with your own tag, and disablable.
 //
-// REPLACE this with the project's real registered Associates tag before publishing. The
-// "-20" suffix is the Amazon US store locale.
+// This is the project's real registered Amazon Associates tag (US store; "-20" suffix).
 const DefaultAssociateTag = "rivr-20"
 
 // optOutNotice is the one-line, non-pushy message shown (once, to stderr) when a user opts
