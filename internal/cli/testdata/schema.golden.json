@@ -1,0 +1,242 @@
+{
+  "commands": {
+    "flags": [
+      {
+        "default": "plain",
+        "help": "Output format: json, plain, or tsv.",
+        "name": "format"
+      },
+      {
+        "help": "Shorthand for --format=json.",
+        "name": "json"
+      },
+      {
+        "help": "Disable colored output.",
+        "name": "no-color"
+      },
+      {
+        "default": "50",
+        "help": "Maximum items to return for list operations.",
+        "name": "limit"
+      },
+      {
+        "help": "Comma-separated dot-path field projection, e.g. asin,title,price.",
+        "name": "select"
+      },
+      {
+        "help": "Terser output (default).",
+        "name": "concise"
+      },
+      {
+        "help": "Richer output.",
+        "name": "detailed"
+      },
+      {
+        "help": "Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default.",
+        "name": "provider"
+      },
+      {
+        "default": "true",
+        "help": "Fence attacker-controllable free text (titles, descriptions, reviews) as untrusted.",
+        "name": "wrap-untrusted"
+      },
+      {
+        "help": "Permit state-changing operations (no-op: amzn is read-only).",
+        "name": "allow-mutations"
+      },
+      {
+        "help": "Print intended mutations without performing them (no-op: amzn is read-only).",
+        "name": "dry-run"
+      },
+      {
+        "help": "Assume yes for confirmations (no-op: amzn is read-only).",
+        "name": "yes"
+      },
+      {
+        "help": "Bypass safety checks (no-op: amzn is read-only).",
+        "name": "force"
+      },
+      {
+        "help": "Never prompt; fail with exit 13 instead.",
+        "name": "no-input"
+      }
+    ],
+    "name": "amzn",
+    "subcommands": [
+      {
+        "args": [
+          {
+            "help": "Search keywords.",
+            "name": "query"
+          }
+        ],
+        "flags": [
+          {
+            "help": "Restrict to a category / browse node.",
+            "name": "category"
+          },
+          {
+            "help": "Minimum average star rating (0-5).",
+            "name": "min-rating"
+          },
+          {
+            "help": "Only Prime-eligible offers.",
+            "name": "prime"
+          },
+          {
+            "help": "Minimum price.",
+            "name": "min-price"
+          },
+          {
+            "help": "Maximum price.",
+            "name": "max-price"
+          },
+          {
+            "help": "Sort order (provider-defined, e.g. relevance, price-asc, rating).",
+            "name": "sort"
+          },
+          {
+            "help": "Opaque pagination cursor from a previous nextCursor.",
+            "name": "cursor"
+          }
+        ],
+        "help": "Search Amazon products by keyword/category.",
+        "name": "search"
+      },
+      {
+        "help": "Get product detail and offers.",
+        "name": "item",
+        "subcommands": [
+          {
+            "args": [
+              {
+                "help": "One or more product ASINs.",
+                "name": "asin"
+              }
+            ],
+            "help": "Get full product detail for one or more ASINs.",
+            "name": "get"
+          },
+          {
+            "args": [
+              {
+                "help": "Product ASIN.",
+                "name": "asin"
+              }
+            ],
+            "help": "Get live offers / buybox / availability for an ASIN.",
+            "name": "offers"
+          }
+        ]
+      },
+      {
+        "args": [
+          {
+            "help": "Product ASIN.",
+            "name": "asin"
+          }
+        ],
+        "flags": [
+          {
+            "help": "Opaque pagination cursor from a previous nextCursor.",
+            "name": "cursor"
+          }
+        ],
+        "help": "Get customer reviews for a product (third-party providers only).",
+        "name": "reviews"
+      },
+      {
+        "args": [
+          {
+            "help": "Parent product ASIN.",
+            "name": "asin"
+          }
+        ],
+        "help": "List size/color/style variations of a product.",
+        "name": "variations"
+      },
+      {
+        "args": [
+          {
+            "help": "Browse-node id.",
+            "name": "node-id"
+          }
+        ],
+        "help": "Inspect the browse-node (category) tree.",
+        "name": "browse"
+      },
+      {
+        "help": "List and inspect configured backends.",
+        "name": "provider",
+        "subcommands": [
+          {
+            "help": "List configured backends and their capabilities.",
+            "name": "list"
+          }
+        ]
+      },
+      {
+        "help": "Manage provider credentials.",
+        "name": "auth",
+        "subcommands": [
+          {
+            "help": "Show authentication status for configured providers.",
+            "name": "status"
+          },
+          {
+            "help": "Store a provider credential (read from stdin).",
+            "name": "login"
+          },
+          {
+            "help": "Remove a provider credential.",
+            "name": "logout"
+          },
+          {
+            "help": "Refresh a provider token (official OAuth backend).",
+            "name": "refresh"
+          }
+        ]
+      },
+      {
+        "help": "Diagnose setup and report fixes.",
+        "name": "doctor"
+      },
+      {
+        "help": "Print the machine-readable command schema (JSON).",
+        "name": "schema"
+      },
+      {
+        "help": "Print the bundled agent SKILL.md.",
+        "name": "agent"
+      },
+      {
+        "help": "Print the version.",
+        "name": "version"
+      }
+    ]
+  },
+  "exit_codes": {
+    "auth_required": 4,
+    "cancelled": 130,
+    "config_error": 10,
+    "empty_results": 3,
+    "generic_error": 1,
+    "input_required": 13,
+    "mutation_blocked": 12,
+    "not_found": 5,
+    "ok": 0,
+    "permission": 6,
+    "rate_limited": 7,
+    "retryable": 8,
+    "unsupported": 11,
+    "usage": 2
+  },
+  "providers": [
+    "stub"
+  ],
+  "safety": {
+    "read_only": true
+  },
+  "schemaVersion": "1",
+  "tool": "amzn"
+}

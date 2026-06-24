@@ -1,0 +1,63 @@
+version: 2
+
+project_name: amzn
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: amzn
+    main: ./cmd/amzn
+    binary: amzn
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/rnwolfe/amzn/internal/version.version={{.Version}}
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: amzn
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+
+checksum:
+  name_template: "checksums.txt"
+
+sboms:
+  - artifacts: archive
+
+homebrew_casks:
+  - repository:
+      owner: rnwolfe
+      name: homebrew-tap
+      token: "{{ .Env.GORELEASER_TOKEN }}"
+    homepage: "https://github.com/rnwolfe/amzn"
+    description: "Agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."
+    # Unsigned binaries are Gatekeeper-quarantined on macOS; strip the attribute on install.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/amzn"]
+          end
+
+release:
+  draft: false
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"

@@ -1,0 +1,17 @@
+# Build output
+/amzn
+/dist/
+*.exe
+*.out
+
+# Go
+/vendor/
+
+# Docs / web tooling (cli-publish)
+node_modules/
+.astro/
+.vercel/
+
+# Editor / OS
+.DS_Store
+*.swp
