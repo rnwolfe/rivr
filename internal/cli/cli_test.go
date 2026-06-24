@@ -81,20 +81,39 @@ func TestUntrustedFencingCanBeDisabled(t *testing.T) {
 	}
 }
 
-func TestAssociateTagDecoratesLinks(t *testing.T) {
+func TestAssociateTagDefaultsToBuiltIn(t *testing.T) {
 	noColor(t)
-	// Off by default: undecorated /dp/ links.
-	out, _, _ := run(t, "search", "x", "--json")
-	if strings.Contains(out, "tag=") {
-		t.Fatalf("links should be undecorated by default:\n%s", out)
+	out, _, code := run(t, "search", "x", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
 	}
-	// With the tag: every product URL carries tag=<id>.
+	if !strings.Contains(out, "tag="+DefaultAssociateTag) {
+		t.Fatalf("default build-in tag not applied:\n%s", out)
+	}
+}
+
+func TestAssociateTagUserOverride(t *testing.T) {
+	noColor(t)
 	out, _, code := run(t, "search", "x", "--associate-tag", "mytag-20", "--json")
 	if code != 0 {
 		t.Fatalf("exit = %d, want 0", code)
 	}
-	if !strings.Contains(out, "tag=mytag-20") {
-		t.Fatalf("product links not decorated with associate tag:\n%s", out)
+	if !strings.Contains(out, "tag=mytag-20") || strings.Contains(out, DefaultAssociateTag) {
+		t.Fatalf("user tag should replace the default:\n%s", out)
+	}
+}
+
+func TestAssociateTagOptOut(t *testing.T) {
+	noColor(t)
+	out, errb, code := run(t, "search", "x", "--no-associate-tag", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if strings.Contains(out, "tag=") {
+		t.Fatalf("opt-out should leave links undecorated:\n%s", out)
+	}
+	if !strings.Contains(errb, "affiliate attribution disabled") {
+		t.Fatalf("opt-out should print a one-line notice to stderr:\n%s", errb)
 	}
 }
 
@@ -211,7 +230,7 @@ func TestSchemaSnapshot(t *testing.T) {
 	delete(s, "version")
 	if safety, ok := s["safety"].(map[string]any); ok {
 		// runtime toggles, not contract shape
-		for _, k := range []string{"allow_mutations", "dry_run", "no_input", "wrap_untrusted"} {
+		for _, k := range []string{"allow_mutations", "dry_run", "no_input", "wrap_untrusted", "associate_tag"} {
 			delete(safety, k)
 		}
 	}

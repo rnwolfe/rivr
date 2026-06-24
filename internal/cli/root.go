@@ -33,8 +33,9 @@ type CLI struct {
 	Detailed bool   `help:"Richer output."`
 
 	// Backend (amzn-specific)
-	Provider     string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"AMZN_PROVIDER"`
-	AssociateTag string `name:"associate-tag" help:"Decorate product deep links with ?tag=<id> (Amazon Associates attribution)." env:"AMZN_ASSOCIATE_TAG"`
+	Provider       string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"AMZN_PROVIDER"`
+	AssociateTag   string `name:"associate-tag" help:"Use your own Amazon Associates tag on product deep links (replaces the built-in default)." env:"AMZN_ASSOCIATE_TAG"`
+	NoAssociateTag bool   `name:"no-associate-tag" help:"Disable affiliate attribution on deep links (turns off the built-in tag that funds amzn)." env:"AMZN_NO_ASSOCIATE_TAG"`
 
 	// Prompt-injection hardening (contract §8) — ON by default; --no-wrap-untrusted to disable.
 	WrapUntrusted bool `default:"true" negatable:"" help:"Fence attacker-controllable free text (titles, descriptions, reviews) as untrusted."`
@@ -63,10 +64,11 @@ type CLI struct {
 
 // Runtime is the per-invocation context bound into every command's Run method.
 type Runtime struct {
-	Cfg   *CLI
-	Out   *output.Writer
-	Stdin io.Reader
-	Ctx   context.Context
+	Cfg          *CLI
+	Out          *output.Writer
+	Stdin        io.Reader
+	Ctx          context.Context
+	warnedOptOut bool // ensures the affiliate opt-out notice prints at most once per run
 }
 
 // Provider resolves the active backend (flag > AMZN_PROVIDER > default), erroring with a
@@ -112,18 +114,28 @@ func (rt *Runtime) FenceAll(ss []string) []string {
 	return ss
 }
 
-// Link decorates a product deep link with the Associates tag when --associate-tag is set.
-// The CLI is read-only; the deep link is its terminal hand-off to amazon.com (purchase
-// happens in the user's browser session). Non-product URLs (images) are not passed through.
+// Link decorates a product deep link with the active Associates tag. The CLI is read-only;
+// the deep link is its terminal hand-off to amazon.com (purchase happens in the user's
+// browser session). By default the built-in project tag is used (see affiliate.go); a user
+// tag replaces it, and --no-associate-tag disables it (with a one-time stderr notice).
+// Non-product URLs (e.g. images) are not passed through here.
 func (rt *Runtime) Link(u string) string {
-	if rt.Cfg.AssociateTag == "" || u == "" {
+	if u == "" {
+		return u
+	}
+	tag, mode := rt.resolveAssociateTag()
+	if mode == affiliateDisabled {
+		if !rt.warnedOptOut {
+			rt.Out.Info(optOutNotice)
+			rt.warnedOptOut = true
+		}
 		return u
 	}
 	sep := "?"
 	if strings.Contains(u, "?") {
 		sep = "&"
 	}
-	return u + sep + "tag=" + url.QueryEscape(rt.Cfg.AssociateTag)
+	return u + sep + "tag=" + url.QueryEscape(tag)
 }
 
 // Run parses args and dispatches, returning the process exit code.

@@ -59,6 +59,21 @@ amzn provider list --json
   `--no-wrap-untrusted`.
 - **Secrets** are read from stdin/env and stored in the OS keyring, never passed as flags.
 
+## Affiliate attribution (how amzn is funded)
+
+Product deep links are tagged with an Amazon Associates ID by default. If a referred link
+leads to a purchase, Amazon pays the project a small referral fee — **the buyer pays nothing
+extra**. This funds development and helps the project meet the Amazon Creators API's
+qualified-sales minimum that keeps official-API access alive.
+
+It is fully transparent and in your control:
+
+- The active tag is visible in every `url`, in `amzn doctor`, and in `amzn schema`.
+- Use your own: `--associate-tag <your-id>` (or `AMZN_ASSOCIATE_TAG`).
+- Turn it off: `--no-associate-tag` (or `AMZN_NO_ASSOCIATE_TAG`).
+
+_As an Amazon Associate the maintainer earns from qualifying purchases._
+
 ## Exit codes
 
 `0` ok · `2` usage · `3` empty results · `4` auth required · `5` not found ·

@@ -95,10 +95,16 @@ func (c *DoctorCmd) Run(rt *Runtime) error {
 	if p, ok := provider.Select(def); ok {
 		defConfigured = p.Configured()
 	}
+	tag, mode := rt.resolveAssociateTag()
+	affDetail := "tag=" + tag + " (" + string(mode) + ")"
+	if mode == affiliateDisabled {
+		affDetail = "disabled (no affiliate attribution)"
+	}
 	checks := []map[string]any{
 		{"name": "default_provider", "ok": known, "detail": "resolved default: " + def},
 		{"name": "credentials", "ok": defConfigured, "detail": "default provider configured"},
 		{"name": "wrap_untrusted", "ok": rt.Cfg.WrapUntrusted, "detail": "prompt-injection fencing enabled"},
+		{"name": "affiliate", "ok": true, "detail": affDetail},
 	}
 	allOK := true
 	for _, ch := range checks {
@@ -134,9 +140,16 @@ func (c *SchemaCmd) Run(rt *Runtime) error {
 			"dry_run":         rt.Cfg.DryRun,
 			"no_input":        rt.Cfg.NoInput,
 			"wrap_untrusted":  rt.Cfg.WrapUntrusted,
+			"associate_tag":   schemaAssociateTag(rt),
 		},
 	}
 	return rt.Out.EmitJSON(out) // schema is always JSON
+}
+
+// schemaAssociateTag reports the active affiliate attribution state for `schema --json`.
+func schemaAssociateTag(rt *Runtime) map[string]any {
+	tag, mode := rt.resolveAssociateTag()
+	return map[string]any{"mode": string(mode), "tag": tag}
 }
 
 func nodeToMap(n *kong.Node) map[string]any {

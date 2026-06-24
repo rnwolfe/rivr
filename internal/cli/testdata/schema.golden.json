@@ -36,8 +36,12 @@
         "name": "provider"
       },
       {
-        "help": "Decorate product deep links with ?tag=\u003cid\u003e (Amazon Associates attribution).",
+        "help": "Use your own Amazon Associates tag on product deep links (replaces the built-in default).",
         "name": "associate-tag"
+      },
+      {
+        "help": "Disable affiliate attribution on deep links (turns off the built-in tag that funds amzn).",
+        "name": "no-associate-tag"
       },
       {
         "default": "true",

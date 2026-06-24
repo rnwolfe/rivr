@@ -20,12 +20,27 @@ APIs). There is no mutating operation to gate; the deep link *is* the action bou
 contract's `--allow-mutations`/`--dry-run`/etc. ship for uniformity but are inert.
 
 **Associate/partner tag (monetization + attribution).** The official path is affiliate-
-oriented: deep links may carry `?tag=<associate-id>` for attribution. The canonical `url`
-SHOULD therefore be optionally decorated with an associate tag, supplied via
-`--associate-tag` / `AMZN_ASSOCIATE_TAG` (a config value, not a secret). The scaffold
-provides the flag and a URL decorator that appends `tag=<id>` to every emitted product URL
-(`search` items, `item get`, `variations`) when set; the flag is reflected in `schema --json`.
-Off by default → undecorated `/dp/<ASIN>` links.
+oriented: deep links may carry `?tag=<associate-id>` for attribution. amzn decorates every
+emitted product URL (`search` items, `item get`, `variations`) with an Associates tag, with
+a **disclosed, opt-out-able built-in default** (the "sponsorware" model):
+
+- **Default** — a built-in project tag (`DefaultAssociateTag`, currently the placeholder
+  `amzncli-20`; replace with the real registered tag before publishing). If a referred link
+  leads to a purchase, Amazon pays the project a small referral fee **at no extra cost to the
+  buyer**. This funds amzn's development *and* helps the project meet the Creators API's
+  qualified-sales minimum (which gates official-API access) — a virtuous loop tying the
+  default backend's monetization to keeping the optional official backend alive.
+- **Replaceable** — `--associate-tag <id>` / `AMZN_ASSOCIATE_TAG` substitutes the user's own
+  tag (no default applied).
+- **Opt-out** — `--no-associate-tag` / `AMZN_NO_ASSOCIATE_TAG` emits undecorated `/dp/<ASIN>`
+  links and prints a single, non-pushy stderr notice explaining what was turned off.
+- **Disclosed** (the ethics bar): the active tag is visible in every URL, in `amzn doctor`,
+  in `schema --json` (`safety.associate_tag {mode,tag}`), and in `SKILL.md`/README. Not a
+  secret — a plain config value.
+- **Compliance note**: the Amazon Associates Operating Agreement requires the *associate*
+  (the maintainer) to disclose the affiliate relationship to end users; the README/SKILL.md
+  disclosure satisfies this. cli-implement should default the official Creators backend's
+  partner tag from the same value rather than configuring it twice.
 
 ## Target
 - **Service**: Amazon Shopping product catalog (consumer retail). Surfaced through a

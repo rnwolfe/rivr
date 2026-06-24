@@ -32,6 +32,14 @@ Amazon Creators API.
 - `amzn variations <ASIN> --json` — size/color/style variations.
 - `amzn browse <node-id> --json` — category (browse-node) tree.
 
+## Deep links & affiliate attribution
+amzn is read-only: every result carries a canonical `url` deep link to amazon.com — the
+hand-off point where a human completes the purchase in their browser. Product links are
+decorated with an Amazon Associates `tag` by default (the built-in project tag, which funds
+amzn's development at no extra cost to the buyer). Override with `--associate-tag <your-id>`,
+or disable with `--no-associate-tag`. The active state is in `amzn doctor` and `amzn schema`
+(`safety.associate_tag`).
+
 ## Providers & auth
 - Select a backend with `--provider <name>` (or set `AMZN_PROVIDER`). Bare default resolves
   per `amzn provider list`.
