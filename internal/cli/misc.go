@@ -1,85 +1,16 @@
 package cli
 
 import (
-	"io"
-	"strings"
-
 	"github.com/alecthomas/kong"
 
+	"github.com/rnwolfe/rivr/internal/auth"
 	"github.com/rnwolfe/rivr/internal/errs"
 	"github.com/rnwolfe/rivr/internal/provider"
 	"github.com/rnwolfe/rivr/internal/skill"
 	"github.com/rnwolfe/rivr/internal/version"
 )
 
-// --- auth -------------------------------------------------------------------
-// Credentials are per-provider API keys (third-party) or client-id+secret (official
-// Creators). Keys are read from STDIN, never argv (contract §7). cli-implement persists
-// them to the OS keyring (OS-native backend only, env -> keyring -> 0600 file fallback);
-// the scaffold leaves storage as a documented placeholder.
-
-type AuthCmd struct {
-	Status AuthStatusCmd `cmd:"" help:"Show authentication status for configured providers."`
-	Login  AuthLoginCmd  `cmd:"" help:"Store a provider credential (read from stdin)."`
-	Logout AuthLogoutCmd `cmd:"" help:"Remove a provider credential."`
-	Refresh AuthRefreshCmd `cmd:"" help:"Refresh a provider token (official OAuth backend)."`
-}
-
-type AuthStatusCmd struct{}
-
-func (c *AuthStatusCmd) Run(rt *Runtime) error {
-	rows := make([]map[string]any, 0)
-	for _, p := range provider.All() {
-		rows = append(rows, map[string]any{
-			"provider":      p.Name(),
-			"authenticated": p.Configured(),
-		})
-	}
-	return rt.Out.Emit(map[string]any{"providers": rows})
-}
-
-type AuthLoginCmd struct{}
-
-func (c *AuthLoginCmd) Run(rt *Runtime) error {
-	name := rt.Cfg.Provider
-	if name == "" {
-		name = provider.DefaultName()
-	}
-	// Read the secret from stdin (never argv). --no-input with no piped data hard-fails.
-	b, _ := io.ReadAll(rt.Stdin)
-	secret := strings.TrimSpace(string(b))
-	if secret == "" {
-		if rt.Cfg.NoInput {
-			return errs.InputRequired("credential on stdin")
-		}
-		return errs.New(errs.ExitUsage, "USAGE", "no credential on stdin",
-			"pipe the key, e.g. `printf %s \"$KEY\" | rivr auth login --provider "+name+"`")
-	}
-	// PLACEHOLDER: cli-implement persists `secret` to the OS keyring for `name`.
-	rt.Out.Info("received credential for provider %q (%d bytes); keyring storage is wired by cli-implement", name, len(secret))
-	return rt.Out.Emit(map[string]any{"provider": name, "stored": false, "note": "keyring wiring pending (cli-implement)"})
-}
-
-type AuthLogoutCmd struct{}
-
-func (c *AuthLogoutCmd) Run(rt *Runtime) error {
-	name := rt.Cfg.Provider
-	if name == "" {
-		name = provider.DefaultName()
-	}
-	return rt.Out.Emit(map[string]any{"provider": name, "ok": true})
-}
-
-type AuthRefreshCmd struct{}
-
-func (c *AuthRefreshCmd) Run(rt *Runtime) error {
-	name := rt.Cfg.Provider
-	if name == "" {
-		name = provider.DefaultName()
-	}
-	// PLACEHOLDER: only meaningful for the official Creators OAuth client-credentials backend.
-	return rt.Out.Emit(map[string]any{"provider": name, "refreshed": false, "note": "token refresh wired by cli-implement (official backend only)"})
-}
+// auth commands live in auth.go.
 
 // --- doctor -----------------------------------------------------------------
 
@@ -90,32 +21,84 @@ func (c *DoctorCmd) Run(rt *Runtime) error {
 	if rt.Cfg.Provider != "" {
 		def = rt.Cfg.Provider
 	}
-	_, known := provider.Select(def)
-	var defConfigured bool
-	if p, ok := provider.Select(def); ok {
-		defConfigured = p.Configured()
+	p, known := provider.Select(def)
+	configured := known && p.Configured()
+
+	checks := []map[string]any{
+		{"name": "default_provider", "ok": known, "detail": "active provider: " + def},
+		{"name": "credentials", "ok": configured, "detail": credDetail(def, configured)},
 	}
+
+	// Connectivity / credential validity — but never deepen an active block.
+	if configured {
+		if cd := provider.Cooldown(def); cd > 0 {
+			checks = append(checks, map[string]any{"name": "connectivity", "ok": true,
+				"detail": "skipped: provider in cooldown (" + itoa(cd) + "s); not probing"})
+		} else if v, ok := provider.ValidatorFor(p); ok {
+			if err := v.Validate(rt.Ctx); err != nil {
+				checks = append(checks, map[string]any{"name": "connectivity", "ok": false, "detail": err.Error()})
+			} else {
+				checks = append(checks, map[string]any{"name": "connectivity", "ok": true, "detail": "reachable; credentials valid"})
+			}
+		}
+	}
+
+	if insecure, fix := auth.InsecureFilePerms(); insecure {
+		checks = append(checks, map[string]any{"name": "secret_perms", "ok": false, "detail": fix})
+	}
+
 	tag, mode := rt.resolveAssociateTag()
 	affDetail := "tag=" + tag + " (" + string(mode) + ")"
 	if mode == affiliateDisabled {
 		affDetail = "disabled (no affiliate attribution)"
 	}
-	checks := []map[string]any{
-		{"name": "default_provider", "ok": known, "detail": "resolved default: " + def},
-		{"name": "credentials", "ok": defConfigured, "detail": "default provider configured"},
-		{"name": "wrap_untrusted", "ok": rt.Cfg.WrapUntrusted, "detail": "prompt-injection fencing enabled"},
-		{"name": "affiliate", "ok": true, "detail": affDetail},
-	}
+	checks = append(checks,
+		map[string]any{"name": "wrap_untrusted", "ok": rt.Cfg.WrapUntrusted, "detail": "prompt-injection fencing enabled"},
+		map[string]any{"name": "affiliate", "ok": true, "detail": affDetail},
+	)
+
 	allOK := true
 	for _, ch := range checks {
 		if ok, _ := ch["ok"].(bool); !ok {
 			allOK = false
 		}
 	}
+	out := map[string]any{"ok": allOK, "provider": def, "secret_backend": auth.Backend(), "checks": checks}
 	if !allOK {
-		return errs.New(errs.ExitConfig, "DOCTOR_FAILED", "one or more checks failed", "see the failing check's detail")
+		// doctor reports findings on stdout AND signals failure via exit code.
+		_ = rt.Out.Emit(out)
+		return errs.New(errs.ExitConfig, "DOCTOR_FAILED", "one or more checks failed", "see each failing check's detail")
 	}
-	return rt.Out.Emit(map[string]any{"ok": true, "checks": checks})
+	return rt.Out.Emit(out)
+}
+
+func credDetail(provider string, configured bool) string {
+	if configured {
+		return provider + " credentials present (" + auth.Backend() + ")"
+	}
+	return "no credentials; run `rivr auth login --provider " + provider + "`"
+}
+
+func itoa(n int) string {
+	if n == 0 {
+		return "0"
+	}
+	neg := n < 0
+	if neg {
+		n = -n
+	}
+	var b [20]byte
+	i := len(b)
+	for n > 0 {
+		i--
+		b[i] = byte('0' + n%10)
+		n /= 10
+	}
+	if neg {
+		i--
+		b[i] = '-'
+	}
+	return string(b[i:])
 }
 
 // --- schema -----------------------------------------------------------------

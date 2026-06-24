@@ -30,6 +30,11 @@ func noColor(t *testing.T) {
 	t.Helper()
 	t.Setenv("NO_COLOR", "1")
 	t.Setenv("RIVR_PROVIDER", "stub")
+	// Hermetic: force the file credential backend and redirect XDG dirs to temp so tests
+	// never touch the real OS keyring or the user's state/data dirs.
+	t.Setenv("RIVR_KEYRING", "file")
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
 }
 
 func TestSearchJSON(t *testing.T) {
@@ -185,6 +190,32 @@ func TestAuthLoginReadsStdin(t *testing.T) {
 	}
 	if strings.Contains(out, "secret-key-123") {
 		t.Fatalf("secret leaked to stdout: %s", out)
+	}
+}
+
+func TestDoctorJSON(t *testing.T) {
+	noColor(t) // default provider = stub (configured + valid)
+	out, _, code := run(t, "doctor", "--json")
+	if code != 0 {
+		t.Fatalf("doctor exit = %d, want 0\n%s", code, out)
+	}
+	var d map[string]any
+	if err := json.Unmarshal([]byte(out), &d); err != nil {
+		t.Fatalf("doctor not JSON: %v", err)
+	}
+	if d["ok"] != true {
+		t.Fatalf("doctor ok = %v, want true", d["ok"])
+	}
+	if _, has := d["checks"]; !has {
+		t.Fatalf("doctor missing checks")
+	}
+}
+
+func TestAuthStatusUnconfigured(t *testing.T) {
+	noColor(t) // hermetic: empty file backend, so serpapi has no key
+	out, _, code := run(t, "auth", "status", "--provider", "serpapi", "--json")
+	if code != 4 {
+		t.Fatalf("exit = %d, want 4 (auth required)\n%s", code, out)
 	}
 }
 

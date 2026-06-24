@@ -37,7 +37,11 @@ func EnvVar(provider, field string) string {
 func ringKey(provider, field string) string { return provider + "/" + field }
 
 // openRing opens the OS-native keyring, or returns ok=false to trigger the file fallback.
+// RIVR_KEYRING=file forces the fallback (headless/CI boxes with no OS keyring, and tests).
 func openRing() (keyring.Keyring, bool) {
+	if os.Getenv("RIVR_KEYRING") == "file" {
+		return nil, false
+	}
 	ring, err := keyring.Open(keyring.Config{
 		ServiceName: serviceName,
 		AllowedBackends: []keyring.BackendType{

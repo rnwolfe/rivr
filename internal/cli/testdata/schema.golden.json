@@ -188,7 +188,7 @@
         "name": "auth",
         "subcommands": [
           {
-            "help": "Show authentication status for configured providers.",
+            "help": "Test credentials and show auth status for the active provider.",
             "name": "status"
           },
           {
@@ -196,11 +196,11 @@
             "name": "login"
           },
           {
-            "help": "Remove a provider credential.",
+            "help": "Remove LOCAL credentials for a provider.",
             "name": "logout"
           },
           {
-            "help": "Refresh a provider token (official OAuth backend).",
+            "help": "Refresh the official backend's OAuth token.",
             "name": "refresh"
           }
         ]
