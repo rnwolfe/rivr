@@ -134,7 +134,8 @@ func Decode(b []byte) (map[string]any, error) {
 	return m, nil
 }
 
-// dig walks a dot-path through nested objects, returning the leaf value and ok.
+// dig walks a dot-path through nested objects AND arrays, returning the leaf value and ok.
+// A numeric segment indexes into an array, e.g. "offersV2.listings.0.price.money.amount".
 func dig(m map[string]any, path string) (any, bool) {
 	var cur any = m
 	start := 0
@@ -144,12 +145,20 @@ func dig(m map[string]any, path string) (any, bool) {
 		}
 		key := path[start:i]
 		start = i + 1
-		obj, ok := cur.(map[string]any)
-		if !ok {
-			return nil, false
-		}
-		cur, ok = obj[key]
-		if !ok {
+		switch c := cur.(type) {
+		case map[string]any:
+			v, ok := c[key]
+			if !ok {
+				return nil, false
+			}
+			cur = v
+		case []any:
+			idx, err := strconv.Atoi(key)
+			if err != nil || idx < 0 || idx >= len(c) {
+				return nil, false
+			}
+			cur = c[idx]
+		default:
 			return nil, false
 		}
 	}

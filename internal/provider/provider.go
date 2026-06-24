@@ -95,11 +95,15 @@ type OffersResult struct {
 }
 
 type ReviewsResult struct {
-	SchemaVersion string   `json:"schemaVersion"`
-	Provider      string   `json:"provider"`
-	ASIN          string   `json:"asin"`
-	Reviews       []Review `json:"reviews"`
-	NextCursor    string   `json:"nextCursor,omitempty"`
+	SchemaVersion string `json:"schemaVersion"`
+	Provider      string `json:"provider"`
+	ASIN          string `json:"asin"`
+	// Scope declares whether these are the full paginated reviews or an on-page sample,
+	// so an agent never mistakes a partial set for the whole (contract: be honest about
+	// partial results). "full" (e.g. Rainforest) or "sample" (e.g. SerpApi product page).
+	Scope      string   `json:"scope,omitempty"`
+	Reviews    []Review `json:"reviews"`
+	NextCursor string   `json:"nextCursor,omitempty"`
 }
 
 type Review struct {
@@ -150,6 +154,13 @@ type Provider interface {
 	GetReviews(ctx context.Context, asin, cursor string) (*ReviewsResult, error)
 	GetVariations(ctx context.Context, asin string) (*VariationsResult, error)
 	GetBrowseNode(ctx context.Context, nodeID string) (*BrowseNode, error)
+}
+
+// TagAware is implemented by backends that need the resolved Amazon Associates tag
+// injected (the official Creators API requires partnerTag on every request). The CLI
+// runtime calls SetPartnerTag before dispatching a command.
+type TagAware interface {
+	SetPartnerTag(tag string)
 }
 
 // Supports reports whether a provider advertises a capability.

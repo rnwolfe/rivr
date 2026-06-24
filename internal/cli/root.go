@@ -86,6 +86,11 @@ func (rt *Runtime) Provider() (provider.Provider, error) {
 	if !p.Configured() {
 		return nil, errs.AuthRequired(p.Name())
 	}
+	// Inject the resolved Associates tag into backends that need it (official Creators API
+	// requires partnerTag on every request).
+	if ta, ok := p.(provider.TagAware); ok {
+		ta.SetPartnerTag(rt.PartnerTag())
+	}
 	return p, nil
 }
 

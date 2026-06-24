@@ -5,10 +5,15 @@ import (
 	"sort"
 )
 
-// registry holds the available backends by name. cli-implement registers the real
-// providers (serpapi, rainforest, creators) here; the scaffold ships only "stub".
+// registry holds the available backends by name. "stub" is the offline/test backend; the
+// real backends are the third-party providers (serpapi default, rainforest), the official
+// Creators API, and the gated scrape provider.
 var registry = map[string]Provider{
-	"stub": &stub{},
+	"serpapi":    newSerpApi(),
+	"rainforest": newRainforest(),
+	"creators":   newCreators(),
+	"scrape":     newScrape(),
+	"stub":       &stub{},
 }
 
 // Names returns the registered provider names, sorted.
@@ -22,13 +27,13 @@ func Names() []string {
 }
 
 // DefaultName resolves the default backend: --provider flag handling happens in the cli
-// layer; this is the fallback chain when no flag is given (RIVR_PROVIDER env, else stub).
-// cli-implement will point the bare default at "serpapi" once it is registered.
+// layer; this is the fallback chain when no flag is given (RIVR_PROVIDER env, else the
+// SerpApi third-party backend — the one with a renewing free tier and review text).
 func DefaultName() string {
 	if p := os.Getenv("RIVR_PROVIDER"); p != "" {
 		return p
 	}
-	return "stub"
+	return "serpapi"
 }
 
 // Select returns the named provider, or the default when name is empty.

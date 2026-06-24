@@ -23,7 +23,14 @@ func runStdin(t *testing.T, stdin string, args ...string) (string, string, int) 
 	return out.String(), errb.String(), code
 }
 
-func noColor(t *testing.T) { t.Helper(); t.Setenv("NO_COLOR", "1") }
+// noColor also pins the offline "stub" backend so data-path tests run without network or
+// credentials (the real default is "serpapi"). Tests that pass --provider explicitly, or
+// only exercise schema/auth, are unaffected.
+func noColor(t *testing.T) {
+	t.Helper()
+	t.Setenv("NO_COLOR", "1")
+	t.Setenv("RIVR_PROVIDER", "stub")
+}
 
 func TestSearchJSON(t *testing.T) {
 	noColor(t)

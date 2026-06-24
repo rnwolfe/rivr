@@ -41,3 +41,13 @@ func (rt *Runtime) resolveAssociateTag() (tag string, mode affiliateMode) {
 		return DefaultAssociateTag, affiliateDefault
 	}
 }
+
+// PartnerTag returns the tag to send to the official Creators API, which REQUIRES a
+// partnerTag on every request. Unlike deep-link decoration, this can't be empty: a user
+// tag wins, otherwise the built-in default (even when link-decoration is opted out).
+func (rt *Runtime) PartnerTag() string {
+	if rt.Cfg.AssociateTag != "" {
+		return rt.Cfg.AssociateTag
+	}
+	return DefaultAssociateTag
+}
