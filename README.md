@@ -60,6 +60,19 @@ fallback (`RIVR_KEYRING=file` forces it on headless boxes).
 `rivr auth status --json` tests the active provider; `rivr doctor --json` runs full
 diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the login command.
 
+### Capability / cost / risk at a glance
+
+| backend | keyless | hosted-safe | reviews | cost | headline risk |
+|---|:--:|:--:|:--:|---|---|
+| **serpapi** (default) | ✗ | ✓ | sample | free tier + paid | paid beyond free tier; sample reviews |
+| **rainforest** | ✗ | ✓ | full | paid (~$25/mo+) | paid per request |
+| **creators** (official) | ✗ | ✓ | none | free* | *needs eligible Associate; no review text |
+| **scrape** | ✓ | ✗ residential | full | free | Amazon ToS + blocking; home use only |
+| **stub** | ✓ | ✓ | fake | free | not real data (testing) |
+
+Full matrix (capabilities, auth, deployment, "which should I use?") → **[docs/backends.md](./docs/backends.md)**.
+The same data is machine-readable for agents: `rivr provider list --json`.
+
 ## Agent-facing surface
 
 - `rivr schema` — machine-readable command tree, exit codes, providers, live safety state.

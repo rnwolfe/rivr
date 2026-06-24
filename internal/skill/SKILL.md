@@ -43,7 +43,10 @@ Amazon Creators API.
 | browse | ✗ | ✗ | ✓ | ✗ |
 
 A capability the active backend lacks returns `UNSUPPORTED_BY_PROVIDER` — switch with
-`--provider`. `scrape` is keyless but OFF by default (see below).
+`--provider`. `scrape` is keyless but OFF by default (see below). `rivr provider list --json`
+returns each backend's full profile (`keyless`, `hostedSafe`, `cost`, `risk`, `reviewsScope`,
+`capabilities`) so you can pick one programmatically, e.g.
+`rivr provider list --json | jq '[.[]|select(.keyless and .hostedSafe)|.name]'`.
 
 ## Deep links & affiliate attribution
 rivr is read-only: every result carries a canonical `url` deep link to amazon.com — the

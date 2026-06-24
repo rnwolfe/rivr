@@ -17,11 +17,20 @@ func (c *ProviderListCmd) Run(rt *Runtime) error {
 	}
 	rows := make([]map[string]any, 0)
 	for _, p := range provider.All() {
+		d := provider.Describe(p)
 		rows = append(rows, map[string]any{
-			"name":         p.Name(),
+			"name":         d.Name,
 			"configured":   p.Configured(),
-			"default":      p.Name() == def,
-			"capabilities": p.Capabilities(),
+			"default":      d.Name == def,
+			"summary":      d.Summary,
+			"keyless":      d.Keyless,
+			"official":     d.Official,
+			"auth":         d.Auth,
+			"hostedSafe":   d.HostedSafe,
+			"cost":         d.Cost,
+			"risk":         d.Risk,
+			"reviewsScope": d.ReviewsScope,
+			"capabilities": d.Capabilities,
 		})
 	}
 	return rt.Out.Emit(rows)
