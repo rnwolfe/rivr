@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"strings"
 
@@ -32,7 +33,8 @@ type CLI struct {
 	Detailed bool   `help:"Richer output."`
 
 	// Backend (amzn-specific)
-	Provider string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"AMZN_PROVIDER"`
+	Provider     string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"AMZN_PROVIDER"`
+	AssociateTag string `name:"associate-tag" help:"Decorate product deep links with ?tag=<id> (Amazon Associates attribution)." env:"AMZN_ASSOCIATE_TAG"`
 
 	// Prompt-injection hardening (contract §8) — ON by default; --no-wrap-untrusted to disable.
 	WrapUntrusted bool `default:"true" negatable:"" help:"Fence attacker-controllable free text (titles, descriptions, reviews) as untrusted."`
@@ -108,6 +110,20 @@ func (rt *Runtime) FenceAll(ss []string) []string {
 		return fence.WrapAll(ss)
 	}
 	return ss
+}
+
+// Link decorates a product deep link with the Associates tag when --associate-tag is set.
+// The CLI is read-only; the deep link is its terminal hand-off to amazon.com (purchase
+// happens in the user's browser session). Non-product URLs (images) are not passed through.
+func (rt *Runtime) Link(u string) string {
+	if rt.Cfg.AssociateTag == "" || u == "" {
+		return u
+	}
+	sep := "?"
+	if strings.Contains(u, "?") {
+		sep = "&"
+	}
+	return u + sep + "tag=" + url.QueryEscape(rt.Cfg.AssociateTag)
 }
 
 // Run parses args and dispatches, returning the process exit code.

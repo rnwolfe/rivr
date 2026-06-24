@@ -34,6 +34,7 @@ func (c *ItemGetCmd) Run(rt *Runtime) error {
 		it.Title = rt.Fence(it.Title)
 		it.Description = rt.Fence(it.Description)
 		it.Features = rt.FenceAll(it.Features)
+		it.URL = rt.Link(it.URL)
 		items = append(items, it)
 	}
 	if len(items) == 1 {

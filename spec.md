@@ -7,6 +7,26 @@
 (consumer retail catalog): product search, product detail, live offers/pricing, customer
 reviews, and product variations. **Read-only by design** — no cart/order/mutation surface.
 
+## Interaction model (why read-only)
+`amzn` is a **read → decide → hand-off** tool. Every command's terminal output is structured
+product data plus a **canonical deep link** (`url` → `https://www.amazon.com/dp/<ASIN>`). The
+agent surfaces the link; the human completes the purchase in a browser, where their
+logged-in Amazon session, payment, shipping address, and Prime already live. The CLI never
+touches cart/checkout.
+
+Read-only is not merely a safety posture — **none of the backends expose a cart/checkout
+surface** (third-party providers and the official Creators API are search/catalog/affiliate
+APIs). There is no mutating operation to gate; the deep link *is* the action boundary. The
+contract's `--allow-mutations`/`--dry-run`/etc. ship for uniformity but are inert.
+
+**Associate/partner tag (monetization + attribution).** The official path is affiliate-
+oriented: deep links may carry `?tag=<associate-id>` for attribution. The canonical `url`
+SHOULD therefore be optionally decorated with an associate tag, supplied via
+`--associate-tag` / `AMZN_ASSOCIATE_TAG` (a config value, not a secret). The scaffold
+provides the flag and a URL decorator that appends `tag=<id>` to every emitted product URL
+(`search` items, `item get`, `variations`) when set; the flag is reflected in `schema --json`.
+Off by default → undecorated `/dp/<ASIN>` links.
+
 ## Target
 - **Service**: Amazon Shopping product catalog (consumer retail). Surfaced through a
   **pluggable provider backend**, not a single upstream.

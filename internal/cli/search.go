@@ -43,6 +43,7 @@ func (c *SearchCmd) Run(rt *Runtime) error {
 	}
 	for i := range res.Items {
 		res.Items[i].Title = rt.Fence(res.Items[i].Title)
+		res.Items[i].URL = rt.Link(res.Items[i].URL)
 	}
 	res.Count = len(res.Items)
 	return rt.Out.Emit(res)

@@ -36,6 +36,10 @@
         "name": "provider"
       },
       {
+        "help": "Decorate product deep links with ?tag=\u003cid\u003e (Amazon Associates attribution).",
+        "name": "associate-tag"
+      },
+      {
         "default": "true",
         "help": "Fence attacker-controllable free text (titles, descriptions, reviews) as untrusted.",
         "name": "wrap-untrusted"

@@ -25,5 +25,8 @@ func (c *VariationsCmd) Run(rt *Runtime) error {
 	if len(res.Variations) == 0 {
 		return errs.Empty("variations")
 	}
+	for i := range res.Variations {
+		res.Variations[i].URL = rt.Link(res.Variations[i].URL)
+	}
 	return rt.Out.Emit(res)
 }

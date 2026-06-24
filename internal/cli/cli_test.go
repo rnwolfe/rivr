@@ -81,6 +81,23 @@ func TestUntrustedFencingCanBeDisabled(t *testing.T) {
 	}
 }
 
+func TestAssociateTagDecoratesLinks(t *testing.T) {
+	noColor(t)
+	// Off by default: undecorated /dp/ links.
+	out, _, _ := run(t, "search", "x", "--json")
+	if strings.Contains(out, "tag=") {
+		t.Fatalf("links should be undecorated by default:\n%s", out)
+	}
+	// With the tag: every product URL carries tag=<id>.
+	out, _, code := run(t, "search", "x", "--associate-tag", "mytag-20", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	if !strings.Contains(out, "tag=mytag-20") {
+		t.Fatalf("product links not decorated with associate tag:\n%s", out)
+	}
+}
+
 func TestSelectProjection(t *testing.T) {
 	noColor(t)
 	out, _, code := run(t, "search", "thing", "--select", "query,provider", "--json")
