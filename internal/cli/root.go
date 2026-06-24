@@ -14,14 +14,14 @@ import (
 
 	"github.com/alecthomas/kong"
 
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/fence"
-	"github.com/rnwolfe/amzn/internal/output"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/fence"
+	"github.com/rnwolfe/rivr/internal/output"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
 // CLI is the kong grammar. Global flags are the universal agent-CLI contract surface plus
-// amzn-specific --provider and --wrap-untrusted; subcommands follow noun-verb grammar.
+// rivr-specific --provider and --wrap-untrusted; subcommands follow noun-verb grammar.
 type CLI struct {
 	// Output (contract §1, §6)
 	Format   string `enum:"json,plain,tsv" default:"plain" help:"Output format: json, plain, or tsv."`
@@ -32,20 +32,20 @@ type CLI struct {
 	Concise  bool   `help:"Terser output (default)."`
 	Detailed bool   `help:"Richer output."`
 
-	// Backend (amzn-specific)
-	Provider       string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"AMZN_PROVIDER"`
-	AssociateTag   string `name:"associate-tag" help:"Use your own Amazon Associates tag on product deep links (replaces the built-in default)." env:"AMZN_ASSOCIATE_TAG"`
-	NoAssociateTag bool   `name:"no-associate-tag" help:"Disable affiliate attribution on deep links (turns off the built-in tag that funds amzn)." env:"AMZN_NO_ASSOCIATE_TAG"`
+	// Backend (rivr-specific)
+	Provider       string `help:"Backend provider (e.g. serpapi, rainforest, creators). Overrides the configured default." env:"RIVR_PROVIDER"`
+	AssociateTag   string `name:"associate-tag" help:"Use your own Amazon Associates tag on product deep links (replaces the built-in default)." env:"RIVR_ASSOCIATE_TAG"`
+	NoAssociateTag bool   `name:"no-associate-tag" help:"Disable affiliate attribution on deep links (turns off the built-in tag that funds rivr)." env:"RIVR_NO_ASSOCIATE_TAG"`
 
 	// Prompt-injection hardening (contract §8) — ON by default; --no-wrap-untrusted to disable.
 	WrapUntrusted bool `default:"true" negatable:"" help:"Fence attacker-controllable free text (titles, descriptions, reviews) as untrusted."`
 
-	// Safety (contract §2). amzn is read-only: these are present for contract uniformity
+	// Safety (contract §2). rivr is read-only: these are present for contract uniformity
 	// but inert — no command performs a mutation.
-	AllowMutations bool `help:"Permit state-changing operations (no-op: amzn is read-only)."`
-	DryRun         bool `help:"Print intended mutations without performing them (no-op: amzn is read-only)."`
-	Yes            bool `help:"Assume yes for confirmations (no-op: amzn is read-only)."`
-	Force          bool `help:"Bypass safety checks (no-op: amzn is read-only)."`
+	AllowMutations bool `help:"Permit state-changing operations (no-op: rivr is read-only)."`
+	DryRun         bool `help:"Print intended mutations without performing them (no-op: rivr is read-only)."`
+	Yes            bool `help:"Assume yes for confirmations (no-op: rivr is read-only)."`
+	Force          bool `help:"Bypass safety checks (no-op: rivr is read-only)."`
 	NoInput        bool `help:"Never prompt; fail with exit 13 instead."`
 
 	// Commands (all reads)
@@ -71,7 +71,7 @@ type Runtime struct {
 	warnedOptOut bool // ensures the affiliate opt-out notice prints at most once per run
 }
 
-// Provider resolves the active backend (flag > AMZN_PROVIDER > default), erroring with a
+// Provider resolves the active backend (flag > RIVR_PROVIDER > default), erroring with a
 // structured config/auth error when unknown or unconfigured.
 func (rt *Runtime) Provider() (provider.Provider, error) {
 	p, ok := provider.Select(rt.Cfg.Provider)
@@ -81,7 +81,7 @@ func (rt *Runtime) Provider() (provider.Provider, error) {
 			name = provider.DefaultName()
 		}
 		return nil, errs.New(errs.ExitConfig, "PROVIDER_UNKNOWN",
-			"unknown provider "+name, "run `amzn provider list` to see configured backends")
+			"unknown provider "+name, "run `rivr provider list` to see configured backends")
 	}
 	if !p.Configured() {
 		return nil, errs.AuthRequired(p.Name())
@@ -89,7 +89,7 @@ func (rt *Runtime) Provider() (provider.Provider, error) {
 	return p, nil
 }
 
-// Guard enforces the read-only-by-default mutation gate (contract §2). amzn has no
+// Guard enforces the read-only-by-default mutation gate (contract §2). rivr has no
 // mutating commands, so this is never reached at runtime — kept for contract uniformity.
 func (rt *Runtime) Guard(op string) error {
 	if rt.Cfg.AllowMutations {
@@ -143,7 +143,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	var cfg CLI
 	helpShown := false
 	parser, err := kong.New(&cfg,
-		kong.Name("amzn"),
+		kong.Name("rivr"),
 		kong.Description("An agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."),
 		kong.Writers(stdout, stderr),
 		kong.Exit(func(int) { helpShown = true }), // --help/--version: we control exit

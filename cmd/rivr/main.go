@@ -1,4 +1,4 @@
-// Command amzn is an agent-focused CLI for search and data retrieval against Amazon
+// Command rivr is an agent-focused CLI for search and data retrieval against Amazon
 // Shopping. It implements the agent-CLI contract (read-only by default, --json,
 // schema --json, structured errors, bounded output, embedded SKILL.md) over a pluggable
 // provider backend.
@@ -11,7 +11,7 @@ package main
 import (
 	"os"
 
-	"github.com/rnwolfe/amzn/internal/cli"
+	"github.com/rnwolfe/rivr/internal/cli"
 )
 
 func main() {

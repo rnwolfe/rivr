@@ -1,14 +1,14 @@
-# spec.md — amzn
+# spec.md — rivr
 
 > The build spec for an agent-focused CLI. Written by `cli-plan`; consumed by `cli-scaffold`,
 > `cli-implement`, and `cli-publish`. Keep it current — it is the single source of truth.
 
-`amzn` — an agent-focused CLI for **search and data retrieval against Amazon Shopping**
+`rivr` — an agent-focused CLI for **search and data retrieval against Amazon Shopping**
 (consumer retail catalog): product search, product detail, live offers/pricing, customer
 reviews, and product variations. **Read-only by design** — no cart/order/mutation surface.
 
 ## Interaction model (why read-only)
-`amzn` is a **read → decide → hand-off** tool. Every command's terminal output is structured
+`rivr` is a **read → decide → hand-off** tool. Every command's terminal output is structured
 product data plus a **canonical deep link** (`url` → `https://www.amazon.com/dp/<ASIN>`). The
 agent surfaces the link; the human completes the purchase in a browser, where their
 logged-in Amazon session, payment, shipping address, and Prime already live. The CLI never
@@ -20,21 +20,21 @@ APIs). There is no mutating operation to gate; the deep link *is* the action bou
 contract's `--allow-mutations`/`--dry-run`/etc. ship for uniformity but are inert.
 
 **Associate/partner tag (monetization + attribution).** The official path is affiliate-
-oriented: deep links may carry `?tag=<associate-id>` for attribution. amzn decorates every
+oriented: deep links may carry `?tag=<associate-id>` for attribution. rivr decorates every
 emitted product URL (`search` items, `item get`, `variations`) with an Associates tag, with
 a **disclosed, opt-out-able built-in default** (the "sponsorware" model):
 
 - **Default** — a built-in project tag (`DefaultAssociateTag`, currently the placeholder
-  `amzncli-20`; replace with the real registered tag before publishing). If a referred link
+  `rivr-20`; replace with the real registered tag before publishing). If a referred link
   leads to a purchase, Amazon pays the project a small referral fee **at no extra cost to the
-  buyer**. This funds amzn's development *and* helps the project meet the Creators API's
+  buyer**. This funds rivr's development *and* helps the project meet the Creators API's
   qualified-sales minimum (which gates official-API access) — a virtuous loop tying the
   default backend's monetization to keeping the optional official backend alive.
-- **Replaceable** — `--associate-tag <id>` / `AMZN_ASSOCIATE_TAG` substitutes the user's own
+- **Replaceable** — `--associate-tag <id>` / `RIVR_ASSOCIATE_TAG` substitutes the user's own
   tag (no default applied).
-- **Opt-out** — `--no-associate-tag` / `AMZN_NO_ASSOCIATE_TAG` emits undecorated `/dp/<ASIN>`
+- **Opt-out** — `--no-associate-tag` / `RIVR_NO_ASSOCIATE_TAG` emits undecorated `/dp/<ASIN>`
   links and prints a single, non-pushy stderr notice explaining what was turned off.
-- **Disclosed** (the ethics bar): the active tag is visible in every URL, in `amzn doctor`,
+- **Disclosed** (the ethics bar): the active tag is visible in every URL, in `rivr doctor`,
   in `schema --json` (`safety.associate_tag {mode,tag}`), and in `SKILL.md`/README. Not a
   secret — a plain config value.
 - **Compliance note**: the Amazon Associates Operating Agreement requires the *associate*
@@ -134,11 +134,11 @@ a **disclosed, opt-out-able built-in default** (the "sponsorware" model):
     (an auth-shaped failure that is really an account-state failure → distinct exit code +
     remediation pointing at the Associates dashboard, not "log in again").
 - **Feasible path to usability (end-to-end)** — fully agent-completable, no browser:
-  1. **Primary / default (third-party)**: `amzn auth login --provider serpapi` reads the API
+  1. **Primary / default (third-party)**: `rivr auth login --provider serpapi` reads the API
      key from **stdin** (`--token-stdin`, never argv) → stored in OS keyring. Fully headless
-     thereafter; `amzn search "usb-c cable"` works immediately. User obtains the key once from
+     thereafter; `rivr search "usb-c cable"` works immediately. User obtains the key once from
      the provider dashboard (one-time, out of band).
-  2. **Optional (official Creators)**: `amzn auth login --provider creators` reads
+  2. **Optional (official Creators)**: `rivr auth login --provider creators` reads
      client-id + client-secret from stdin → tool runs the **client-credentials grant**
      itself, caches the bearer, and `auth refresh` re-mints on expiry. No redirect URI, no
      callback, no cert. *Precondition the tool checks in `doctor`/`auth status`: caller is an
@@ -157,13 +157,13 @@ no command consumes it; the tool is structurally read-only.
 
 | Command | Read/Mutation | Description | Key output fields |
 |---|---|---|---|
-| `amzn search <query>` | read | Keyword/category product search (filters: `--category`, `--min-rating`, `--prime`, `--min-price`/`--max-price`, `--sort`). | `items[]{asin,title*,price,currency,rating,reviewCount,prime,url,image}`, `nextCursor`, `provider` |
-| `amzn item get <asin...>` | read | Full product detail for one or more ASINs (`--detailed` adds bullets/specs). | `asin,title*,brand,price,currency,offers,features*[],description*,images[],rating,reviewCount,salesRank,url` |
-| `amzn item offers <asin>` | read | Live offers / buybox / price / availability (OffersV2-style). | `offers[]{price,currency,condition,merchant,prime,availability}`, `buyboxPrice` |
-| `amzn reviews <asin>` | read | Customer reviews (text + rating). **Third-party providers only**; on official/scrape backends returns a structured `UNSUPPORTED_BY_PROVIDER` error. | `reviews[]{rating,title*,body*,author,date,verified}`, `nextCursor` |
-| `amzn variations <asin>` | read | Size/color/style variations of a parent product. | `parentAsin,variations[]{asin,attributes,price,url}` |
-| `amzn browse <node-id>` | read | Browse-node (category) tree metadata. *(Official Creators backend; degrade gracefully on providers without it.)* | `nodeId,name,ancestors[],children[]` |
-| `amzn provider list` | read | Configured providers + which is default + auth status of each. | `providers[]{name,configured,default,capabilities}` |
+| `rivr search <query>` | read | Keyword/category product search (filters: `--category`, `--min-rating`, `--prime`, `--min-price`/`--max-price`, `--sort`). | `items[]{asin,title*,price,currency,rating,reviewCount,prime,url,image}`, `nextCursor`, `provider` |
+| `rivr item get <asin...>` | read | Full product detail for one or more ASINs (`--detailed` adds bullets/specs). | `asin,title*,brand,price,currency,offers,features*[],description*,images[],rating,reviewCount,salesRank,url` |
+| `rivr item offers <asin>` | read | Live offers / buybox / price / availability (OffersV2-style). | `offers[]{price,currency,condition,merchant,prime,availability}`, `buyboxPrice` |
+| `rivr reviews <asin>` | read | Customer reviews (text + rating). **Third-party providers only**; on official/scrape backends returns a structured `UNSUPPORTED_BY_PROVIDER` error. | `reviews[]{rating,title*,body*,author,date,verified}`, `nextCursor` |
+| `rivr variations <asin>` | read | Size/color/style variations of a parent product. | `parentAsin,variations[]{asin,attributes,price,url}` |
+| `rivr browse <node-id>` | read | Browse-node (category) tree metadata. *(Official Creators backend; degrade gracefully on providers without it.)* | `nodeId,name,ancestors[],children[]` |
+| `rivr provider list` | read | Configured providers + which is default + auth status of each. | `providers[]{name,configured,default,capabilities}` |
 
 `*` = free-text field from the target → **fenced as untrusted by default in agent mode**
 (contract §8).
@@ -189,7 +189,7 @@ Single **provider-normalized** shape; `schemaVersion` field; append-only. Free-t
 carry the untrusted-fence wrapper in agent mode.
 
 ```jsonc
-// amzn search
+// rivr search
 {
   "schemaVersion": "1",
   "provider": "serpapi",
@@ -203,12 +203,12 @@ carry the untrusted-fence wrapper in agent mode.
   "count": 1, "limit": 50
 }
 
-// amzn item get
+// rivr item get
 { "schemaVersion": "1", "provider": "...", "asin": "...", "title": "...", "brand": "...",
   "price": 0.0, "currency": "USD", "offers": [ … ], "features": [ … ], "description": "…",
   "images": [ … ], "rating": 4.6, "reviewCount": 21034, "salesRank": 142, "url": "…" }
 
-// amzn reviews
+// rivr reviews
 { "schemaVersion": "1", "provider": "...", "asin": "...",
   "reviews": [ { "rating": 5, "title": "…", "body": "…", "author": "…",
                  "date": "2026-05-01", "verified": true } ],
@@ -227,8 +227,8 @@ No conflicts: `--provider` is the only tool-specific global.
 ## Distribution
 - **Targets**: `go install` + Homebrew tap (GoReleaser `homebrew_casks`) + release binaries
   (linux/macos, amd64/arm64).
-- **Trial path**: `brew install <tap>/amzn` or download a release binary → `amzn auth login
-  --provider serpapi` (renewing free tier) → `amzn search …`. No build toolchain needed.
+- **Trial path**: `brew install <tap>/rivr` or download a release binary → `rivr auth login
+  --provider serpapi` (renewing free tier) → `rivr search …`. No build toolchain needed.
 - **Agent hot-loop path**: the single static Go binary (lowest cold start; invoked in loops).
 
 ## Publish

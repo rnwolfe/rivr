@@ -1,27 +1,27 @@
 version: 2
 
-project_name: amzn
+project_name: rivr
 
 before:
   hooks:
     - go mod tidy
 
 builds:
-  - id: amzn
-    main: ./cmd/amzn
-    binary: amzn
+  - id: rivr
+    main: ./cmd/rivr
+    binary: rivr
     env:
       - CGO_ENABLED=0
     flags:
       - -trimpath
     ldflags:
-      - -s -w -X github.com/rnwolfe/amzn/internal/version.version={{.Version}}
+      - -s -w -X github.com/rnwolfe/rivr/internal/version.version={{.Version}}
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     mod_timestamp: "{{ .CommitTimestamp }}"
 
 archives:
-  - id: amzn
+  - id: rivr
     formats: [tar.gz]
     format_overrides:
       - goos: windows
@@ -40,14 +40,14 @@ homebrew_casks:
       owner: rnwolfe
       name: homebrew-tap
       token: "{{ .Env.GORELEASER_TOKEN }}"
-    homepage: "https://github.com/rnwolfe/amzn"
+    homepage: "https://github.com/rnwolfe/rivr"
     description: "Agent-friendly CLI for Amazon Shopping search and data retrieval (read-only)."
     # Unsigned binaries are Gatekeeper-quarantined on macOS; strip the attribute on install.
     hooks:
       post:
         install: |
           if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/amzn"]
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"]
           end
 
 release:

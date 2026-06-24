@@ -22,10 +22,10 @@ func Names() []string {
 }
 
 // DefaultName resolves the default backend: --provider flag handling happens in the cli
-// layer; this is the fallback chain when no flag is given (AMZN_PROVIDER env, else stub).
+// layer; this is the fallback chain when no flag is given (RIVR_PROVIDER env, else stub).
 // cli-implement will point the bare default at "serpapi" once it is registered.
 func DefaultName() string {
-	if p := os.Getenv("AMZN_PROVIDER"); p != "" {
+	if p := os.Getenv("RIVR_PROVIDER"); p != "" {
 		return p
 	}
 	return "stub"

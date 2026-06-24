@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
-// SearchCmd implements `amzn search <query>` (read).
+// SearchCmd implements `rivr search <query>` (read).
 type SearchCmd struct {
 	Query     string  `arg:"" help:"Search keywords."`
 	Category  string  `help:"Restrict to a category / browse node."`

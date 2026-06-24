@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
 // ItemCmd groups product-detail read subcommands.
@@ -11,7 +11,7 @@ type ItemCmd struct {
 	Offers ItemOffersCmd `cmd:"" help:"Get live offers / buybox / availability for an ASIN."`
 }
 
-// ItemGetCmd implements `amzn item get <asin...>` (read).
+// ItemGetCmd implements `rivr item get <asin...>` (read).
 type ItemGetCmd struct {
 	ASIN []string `arg:"" help:"One or more product ASINs."`
 }
@@ -43,7 +43,7 @@ func (c *ItemGetCmd) Run(rt *Runtime) error {
 	return rt.Out.Emit(items)
 }
 
-// ItemOffersCmd implements `amzn item offers <asin>` (read).
+// ItemOffersCmd implements `rivr item offers <asin>` (read).
 type ItemOffersCmd struct {
 	ASIN string `arg:"" help:"Product ASIN."`
 }

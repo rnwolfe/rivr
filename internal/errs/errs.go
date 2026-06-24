@@ -2,7 +2,7 @@
 // Exit codes are a contract: distinct, documented, and append-only. See contract.md §4.
 package errs
 
-// Stable exit codes. amzn additions over the base table: ExitUnsupported (11).
+// Stable exit codes. rivr additions over the base table: ExitUnsupported (11).
 const (
 	ExitOK              = 0
 	ExitGeneric         = 1
@@ -14,8 +14,8 @@ const (
 	ExitRate            = 7 // provider quota exhausted / official TPS limit
 	ExitRetry           = 8
 	ExitConfig          = 10
-	ExitUnsupported     = 11 // capability not supported by the active provider (amzn addition)
-	ExitMutationBlocked = 12 // present for contract uniformity; amzn is read-only (never returned)
+	ExitUnsupported     = 11 // capability not supported by the active provider (rivr addition)
+	ExitMutationBlocked = 12 // present for contract uniformity; rivr is read-only (never returned)
 	ExitInputRequired   = 13
 	ExitCancelled       = 130
 )
@@ -56,18 +56,18 @@ func New(exit int, code, msg, remediation string) *CLIError {
 	return &CLIError{Message: msg, Code: code, Remediation: remediation, Exit: exit}
 }
 
-// MutationBlocked is returned when a mutating op runs without --allow-mutations. amzn is
+// MutationBlocked is returned when a mutating op runs without --allow-mutations. rivr is
 // read-only, so this is never triggered in practice — kept for contract uniformity.
 func MutationBlocked(op string) *CLIError {
 	return New(ExitMutationBlocked, "MUTATION_BLOCKED",
 		op+" is a mutating operation and is blocked by default",
-		"re-run with --allow-mutations (amzn is read-only, so this should not occur)")
+		"re-run with --allow-mutations (rivr is read-only, so this should not occur)")
 }
 
 // NotFound is returned when a product/node id does not exist.
 func NotFound(kind, id string) *CLIError {
 	return New(ExitNotFound, "NOT_FOUND", kind+" "+id+" not found",
-		"verify the ASIN/node id; try `amzn search` to find a valid one")
+		"verify the ASIN/node id; try `rivr search` to find a valid one")
 }
 
 // Empty is returned when a search/list yields zero matches (distinct from an error).
@@ -80,7 +80,7 @@ func Empty(what string) *CLIError {
 func AuthRequired(provider string) *CLIError {
 	return New(ExitAuth, "AUTH_REQUIRED",
 		"no credentials configured for provider "+provider,
-		"run `amzn auth login --provider "+provider+"` and pipe the API key on stdin")
+		"run `rivr auth login --provider "+provider+"` and pipe the API key on stdin")
 }
 
 // RateLimited maps provider quota / official TPS limits to a retry signal.

@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
-// VariationsCmd implements `amzn variations <asin>` (read).
+// VariationsCmd implements `rivr variations <asin>` (read).
 type VariationsCmd struct {
 	ASIN string `arg:"" help:"Parent product ASIN."`
 }

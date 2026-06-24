@@ -1,5 +1,5 @@
 # Build output
-/amzn
+/rivr
 /dist/
 *.exe
 *.out

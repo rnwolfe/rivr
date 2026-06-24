@@ -1,4 +1,4 @@
-module github.com/rnwolfe/amzn
+module github.com/rnwolfe/rivr
 
 go 1.25
 

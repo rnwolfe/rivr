@@ -40,7 +40,7 @@
         "name": "associate-tag"
       },
       {
-        "help": "Disable affiliate attribution on deep links (turns off the built-in tag that funds amzn).",
+        "help": "Disable affiliate attribution on deep links (turns off the built-in tag that funds rivr).",
         "name": "no-associate-tag"
       },
       {
@@ -49,19 +49,19 @@
         "name": "wrap-untrusted"
       },
       {
-        "help": "Permit state-changing operations (no-op: amzn is read-only).",
+        "help": "Permit state-changing operations (no-op: rivr is read-only).",
         "name": "allow-mutations"
       },
       {
-        "help": "Print intended mutations without performing them (no-op: amzn is read-only).",
+        "help": "Print intended mutations without performing them (no-op: rivr is read-only).",
         "name": "dry-run"
       },
       {
-        "help": "Assume yes for confirmations (no-op: amzn is read-only).",
+        "help": "Assume yes for confirmations (no-op: rivr is read-only).",
         "name": "yes"
       },
       {
-        "help": "Bypass safety checks (no-op: amzn is read-only).",
+        "help": "Bypass safety checks (no-op: rivr is read-only).",
         "name": "force"
       },
       {
@@ -69,7 +69,7 @@
         "name": "no-input"
       }
     ],
-    "name": "amzn",
+    "name": "rivr",
     "subcommands": [
       {
         "args": [
@@ -246,5 +246,5 @@
     "read_only": true
   },
   "schemaVersion": "1",
-  "tool": "amzn"
+  "tool": "rivr"
 }

@@ -6,10 +6,10 @@ import (
 
 	"github.com/alecthomas/kong"
 
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
-	"github.com/rnwolfe/amzn/internal/skill"
-	"github.com/rnwolfe/amzn/internal/version"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
+	"github.com/rnwolfe/rivr/internal/skill"
+	"github.com/rnwolfe/rivr/internal/version"
 )
 
 // --- auth -------------------------------------------------------------------
@@ -53,7 +53,7 @@ func (c *AuthLoginCmd) Run(rt *Runtime) error {
 			return errs.InputRequired("credential on stdin")
 		}
 		return errs.New(errs.ExitUsage, "USAGE", "no credential on stdin",
-			"pipe the key, e.g. `printf %s \"$KEY\" | amzn auth login --provider "+name+"`")
+			"pipe the key, e.g. `printf %s \"$KEY\" | rivr auth login --provider "+name+"`")
 	}
 	// PLACEHOLDER: cli-implement persists `secret` to the OS keyring for `name`.
 	rt.Out.Info("received credential for provider %q (%d bytes); keyring storage is wired by cli-implement", name, len(secret))
@@ -123,12 +123,12 @@ func (c *DoctorCmd) Run(rt *Runtime) error {
 type SchemaCmd struct{}
 
 func (c *SchemaCmd) Run(rt *Runtime) error {
-	k, err := kong.New(&CLI{}, kong.Name("amzn"))
+	k, err := kong.New(&CLI{}, kong.Name("rivr"))
 	if err != nil {
 		return errs.New(errs.ExitGeneric, "SCHEMA_ERROR", err.Error(), "")
 	}
 	out := map[string]any{
-		"tool":          "amzn",
+		"tool":          "rivr",
 		"version":       version.String(),
 		"schemaVersion": provider.SchemaVersion,
 		"commands":      nodeToMap(k.Model.Node),

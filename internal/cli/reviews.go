@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
-// ReviewsCmd implements `amzn reviews <asin>` (read). Review text is the sharpest
+// ReviewsCmd implements `rivr reviews <asin>` (read). Review text is the sharpest
 // prompt-injection vector — bodies/titles are always fenced. Not all backends serve it
 // (the official Creators API returns no review text → UNSUPPORTED_BY_PROVIDER).
 type ReviewsCmd struct {

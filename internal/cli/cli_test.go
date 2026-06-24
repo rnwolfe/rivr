@@ -144,7 +144,7 @@ func TestUnknownProvider(t *testing.T) {
 }
 
 func TestReadOnlyGate(t *testing.T) {
-	// amzn has no mutating command, but the gate must still default-deny.
+	// rivr has no mutating command, but the gate must still default-deny.
 	rt := &Runtime{Cfg: &CLI{}}
 	err := rt.Guard("hypothetical mutation")
 	if err == nil {
@@ -215,7 +215,7 @@ func TestSchemaHasSafetyAndExitCodes(t *testing.T) {
 
 // TestSchemaSnapshot is the required CI gate (contract §10): any change to the command
 // tree / exit-code table / providers is a reviewed golden diff, not a silent break.
-// Run `AMZN_UPDATE_GOLDEN=1 go test ./internal/cli/...` to regenerate after an intended change.
+// Run `RIVR_UPDATE_GOLDEN=1 go test ./internal/cli/...` to regenerate after an intended change.
 func TestSchemaSnapshot(t *testing.T) {
 	noColor(t)
 	out, _, code := run(t, "schema")
@@ -239,7 +239,7 @@ func TestSchemaSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 	golden := filepath.Join("testdata", "schema.golden.json")
-	if os.Getenv("AMZN_UPDATE_GOLDEN") == "1" {
+	if os.Getenv("RIVR_UPDATE_GOLDEN") == "1" {
 		if err := os.MkdirAll("testdata", 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -251,9 +251,9 @@ func TestSchemaSnapshot(t *testing.T) {
 	}
 	want, err := os.ReadFile(golden)
 	if err != nil {
-		t.Fatalf("missing golden (run AMZN_UPDATE_GOLDEN=1 go test ./...): %v", err)
+		t.Fatalf("missing golden (run RIVR_UPDATE_GOLDEN=1 go test ./...): %v", err)
 	}
 	if strings.TrimSpace(string(want)) != strings.TrimSpace(string(stable)) {
-		t.Fatalf("schema drift — review and regenerate with AMZN_UPDATE_GOLDEN=1\n--- got ---\n%s", stable)
+		t.Fatalf("schema drift — review and regenerate with RIVR_UPDATE_GOLDEN=1\n--- got ---\n%s", stable)
 	}
 }

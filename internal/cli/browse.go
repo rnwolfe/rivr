@@ -1,11 +1,11 @@
 package cli
 
 import (
-	"github.com/rnwolfe/amzn/internal/errs"
-	"github.com/rnwolfe/amzn/internal/provider"
+	"github.com/rnwolfe/rivr/internal/errs"
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
-// BrowseCmd implements `amzn browse <node-id>` (read). Browse nodes are an official
+// BrowseCmd implements `rivr browse <node-id>` (read). Browse nodes are an official
 // Creators-API feature; providers that lack it return UNSUPPORTED_BY_PROVIDER.
 type BrowseCmd struct {
 	NodeID string `arg:"" name:"node-id" help:"Browse-node id."`

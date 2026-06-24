@@ -16,7 +16,7 @@ func (s *stub) Capabilities() []string {
 }
 
 // Configured reports true so the skeleton is runnable with no credentials. Real backends
-// return false until `amzn auth login` has stored a key in the keyring.
+// return false until `rivr auth login` has stored a key in the keyring.
 func (s *stub) Configured() bool { return true }
 
 func (s *stub) Search(_ context.Context, query string, opts SearchOpts) (*SearchResult, error) {
