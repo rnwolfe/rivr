@@ -42,15 +42,16 @@ homebrew_casks:
       owner: rnwolfe
       name: homebrew-tap
       token: "{{ .Env.GORELEASER_TOKEN }}"
-    homepage: "https://rivr.sh"
-    description: "A read-only Amazon Shopping CLI built for AI agents."
-    # Unsigned binaries are Gatekeeper-quarantined on macOS; strip the attribute on install.
+    homepage: "https://rivr.sh/"
+    # brew audit: no leading article, no trailing period.
+    description: "Read-only Amazon Shopping CLI for AI agents"
+    # download domain (github.com) differs from the homepage domain (rivr.sh) → declare it verified.
+    url:
+      verified: "github.com/rnwolfe/rivr/"
+    # Unsigned binaries are Gatekeeper-quarantined on macOS; strip on install (modifier-if, one line, to satisfy brew style).
     hooks:
       post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"]
-          end
+        install: 'system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"] if OS.mac?'
 
 release:
   draft: false
