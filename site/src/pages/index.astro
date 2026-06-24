@@ -186,7 +186,7 @@ const backends = [
       .btn { border: 1px solid var(--rvr-line); border-radius: var(--rvr-radius); padding: .7rem 1.3rem; color: var(--rvr-paper); font-weight: 600; }
       .btn:hover { text-decoration: none; border-color: var(--rvr-current); }
       .btn.primary { background: var(--rvr-grad-current); color: #04181a; border: 0; }
-      .demo { width: 100%; max-width: 880px; margin: 3rem auto 0; border: 1px solid var(--rvr-line); border-radius: var(--rvr-radius-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); display: block; }
+      .demo { width: 100%; height: auto; aspect-ratio: 1180 / 700; max-width: 880px; margin: 3rem auto 0; border: 1px solid var(--rvr-line); border-radius: var(--rvr-radius-lg); box-shadow: 0 30px 80px -30px rgba(0,0,0,.7); display: block; }
 
       section h2 { font-family: var(--rvr-font-display); font-weight: 800; font-size: clamp(1.7rem, 3.5vw, 2.5rem); color: var(--rvr-paper); letter-spacing: -0.02em; text-align: center; margin: 4.5rem 0 2rem; }
       .vs { color: var(--rvr-current); }
@@ -228,6 +228,8 @@ const backends = [
       @media (max-width: 800px) {
         .ways .grid, .feats { grid-template-columns: 1fr; }
         .nav nav a:first-child { display: none; }
+        .cta { max-width: 100%; }
+        .install { font-size: .8rem; }
       }
     </style>
 
