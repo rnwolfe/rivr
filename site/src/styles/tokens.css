@@ -1,0 +1,36 @@
+/*
+ * rivr design tokens — the SINGLE source of truth for the landing page AND the Starlight
+ * docs (imported by both via astro.config customCss). Concept: terminal-noir + a river
+ * "current" accent (teal→cyan), characterful display type. Never hand-copy these elsewhere.
+ */
+:root {
+  /* palette — deep ink with a flowing teal/cyan current and a warm accent for the tag/affiliate */
+  --rvr-ink-900: #070b12;
+  --rvr-ink-850: #0a0f1a;
+  --rvr-ink-800: #0d1422;
+  --rvr-ink-700: #131c2e;
+  --rvr-ink-600: #1c2740;
+  --rvr-line: #243049;
+  --rvr-fog: #8aa0c0;
+  --rvr-mist: #b9c7de;
+  --rvr-paper: #eef4ff;
+
+  --rvr-current: #2fe6c4; /* river teal — primary accent */
+  --rvr-current-2: #29c0e8; /* cyan */
+  --rvr-deep: #1f8fff; /* deep blue */
+  --rvr-amber: #f6b352; /* affiliate/tag + warnings */
+  --rvr-rose: #ff6b8b; /* "the other way" / danger */
+
+  --rvr-grad-current: linear-gradient(100deg, var(--rvr-current), var(--rvr-current-2) 55%, var(--rvr-deep));
+
+  /* type */
+  --rvr-font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --rvr-font-body: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --rvr-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Cascadia Code", monospace;
+
+  /* spacing / radius / motion */
+  --rvr-radius: 12px;
+  --rvr-radius-lg: 20px;
+  --rvr-maxw: 1120px;
+  --rvr-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

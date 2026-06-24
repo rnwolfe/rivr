@@ -1,0 +1,35 @@
+/* Starlight theme overrides — maps Starlight's tokens onto the shared rivr palette so the
+ * docs and the landing read as one product. Dark by default; clean light mode. */
+:root {
+  --sl-font: var(--rvr-font-body);
+  --sl-font-mono: var(--rvr-font-mono);
+}
+:root[data-theme="dark"] {
+  --sl-color-accent-low: #0c2b2c;
+  --sl-color-accent: var(--rvr-current);
+  --sl-color-accent-high: #b6fff0;
+  --sl-color-white: var(--rvr-paper);
+  --sl-color-gray-1: var(--rvr-mist);
+  --sl-color-gray-2: var(--rvr-fog);
+  --sl-color-gray-3: #6c80a2;
+  --sl-color-gray-4: var(--rvr-line);
+  --sl-color-gray-5: var(--rvr-ink-700);
+  --sl-color-gray-6: var(--rvr-ink-800);
+  --sl-color-black: var(--rvr-ink-900);
+  --sl-color-bg: var(--rvr-ink-900);
+  --sl-color-bg-nav: color-mix(in srgb, var(--rvr-ink-850) 88%, transparent);
+  --sl-color-bg-sidebar: var(--rvr-ink-850);
+}
+:root[data-theme="light"] {
+  --sl-color-accent-low: #c8fff3;
+  --sl-color-accent: #0c8f78;
+  --sl-color-accent-high: #064a3d;
+}
+
+/* Branded site title + accents */
+.site-title { font-family: var(--rvr-font-display); font-weight: 800; letter-spacing: -0.02em; }
+[data-theme="dark"] .site-title { color: var(--rvr-paper); }
+.sl-markdown-content h1,
+.sl-markdown-content h2,
+.sl-markdown-content h3 { font-family: var(--rvr-font-display); letter-spacing: -0.015em; }
+[data-theme="dark"] .sl-markdown-content a { color: var(--rvr-current); }

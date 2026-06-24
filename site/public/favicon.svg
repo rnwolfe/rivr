@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="rivr">
+  <defs>
+    <linearGradient id="rvr" x1="2" y1="6" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2fe6c4"/>
+      <stop offset="0.55" stop-color="#29c0e8"/>
+      <stop offset="1" stop-color="#1f8fff"/>
+    </linearGradient>
+  </defs>
+  <path d="M3 9c5 0 5 4 10 4s5-4 10-4 5 4 6 4" stroke="url(#rvr)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M3 16c5 0 5 4 10 4s5-4 10-4 5 4 6 4" stroke="url(#rvr)" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <path d="M3 23c5 0 5 4 10 4s5-4 10-4 5 4 6 4" stroke="url(#rvr)" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+</svg>

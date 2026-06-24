@@ -1,0 +1,15 @@
+---
+// Per-page OG/social card: extends Starlight's default Head and points og:image at the
+// generated card for this page (falling back to the default card). Cards are built by
+// scripts/gen-og.mjs — keep the `known` list in sync with the pages there.
+import Default from "@astrojs/starlight/components/Head.astro";
+
+const SITE = "https://rivr.sh";
+const known = ["getting-started", "backends", "auth", "commands", "agents"];
+const id = (Astro.props.entry?.id ?? "").replace(/\.(md|mdx)$/, "");
+const og = `${SITE}/og/${known.includes(id) ? id : "default"}.png`;
+---
+
+<Default {...Astro.props}><slot /></Default>
+<meta property="og:image" content={og} />
+<meta name="twitter:image" content={og} />
