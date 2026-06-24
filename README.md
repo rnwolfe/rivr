@@ -36,13 +36,16 @@ fencing, and stdin/keyring secrets.
 ## Install
 
 ```bash
+# Homebrew (macOS / Linux)
+brew install rnwolfe/tap/rivr
+
 # Go (any platform; static, no CGO)
 go install github.com/rnwolfe/rivr/cmd/rivr@latest
 ```
 
 Or grab a prebuilt binary (linux/macOS/windows, amd64/arm64) from
 [Releases](https://github.com/rnwolfe/rivr/releases) — each ships with checksums, an SBOM,
-and build-provenance attestation. _A Homebrew tap is planned._
+and build-provenance attestation.
 
 ## Quickstart (first success in <60s, no account)
 
