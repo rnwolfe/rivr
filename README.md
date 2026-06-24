@@ -44,6 +44,22 @@ rivr variations B0XXXXXXX --json
 rivr provider list --json
 ```
 
+## Providers & authentication
+
+`rivr` normalizes one schema across backends; pick with `--provider` (or `RIVR_PROVIDER`).
+Secrets are read from **stdin** (never argv) and stored in the OS keyring, with a `0600` file
+fallback (`RIVR_KEYRING=file` forces it on headless boxes).
+
+| Provider | Get a credential | Notes |
+|---|---|---|
+| **serpapi** (default) | sign up → [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key) → `printf %s "$KEY" \| rivr auth login --provider serpapi` | renewing free tier (~250/mo); reviews are a page **sample** |
+| **rainforest** | [Traject Data](https://trajectdata.com/) dashboard → `printf %s "$KEY" \| rivr auth login --provider rainforest` | **full** paginated reviews + real offers |
+| **creators** (official) | Associates Central → Tools → Creators API → `printf '%s\n%s' "$ID" "$SECRET" \| rivr auth login --provider creators` | needs an approved Associate w/ ≥10 sales/30d, else `ASSOCIATE_NOT_ELIGIBLE`; no review text |
+| **scrape** | `RIVR_SCRAPE_ENABLE=1` (opt-in) | OFF by default — Amazon ToS + bot detection; ships no selectors |
+
+`rivr auth status --json` tests the active provider; `rivr doctor --json` runs full
+diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the login command.
+
 ## Agent-facing surface
 
 - `rivr schema` — machine-readable command tree, exit codes, providers, live safety state.
