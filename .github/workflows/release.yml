@@ -31,6 +31,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with contents:write on rnwolfe/homebrew-tap (for the Homebrew cask push).
+          GORELEASER_TOKEN: ${{ secrets.GORELEASER_TOKEN }}
 
       # SLSA build provenance. attest-build-provenance fails on private user repos, so guard it.
       - uses: actions/attest-build-provenance@v3
