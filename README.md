@@ -1,48 +1,71 @@
+<div align="center">
+
 # rivr
 
-> An agent-friendly CLI for **Amazon Shopping search and data retrieval**. Read-only by
-> design, structured JSON everywhere, self-describing, and built for LLM agents to drive
-> safely.
+**A read-only Amazon Shopping CLI built for AI agents.**
 
-`rivr` searches Amazon's catalog and retrieves product detail, live offers, customer
-reviews, and variations through a **pluggable provider backend** — a third-party data
-provider (default) or the official Amazon Creators API. It implements the
-[agent-CLI contract](./spec.md): read-only, `schema --json`, structured errors with stable
-exit codes, bounded output, an embedded agent guide, and **prompt-injection fencing on by
-default**.
+Amazon's Product Advertising API was retired in 2026 and no agent-safe replacement existed —
+so `rivr` is one. Search products, fetch detail/offers/reviews/variations through **one
+normalized schema** over a pluggable backend (SerpApi, Rainforest, the official Amazon
+Creators API, or keyless scraping), with the [Agent CLI Guidelines](https://aclig.dev/) baked
+in: read-only by default, structured errors + stable exit codes, bounded JSON, prompt-injection
+fencing, and stdin/keyring secrets.
 
-> [!NOTE]
-> Scaffolded skeleton. The real provider integrations and keyring auth are wired by
-> `cli-implement`; today it ships a `stub` backend so the contract surface is runnable and
-> tested offline.
+[![ci](https://github.com/rnwolfe/rivr/actions/workflows/ci.yml/badge.svg)](https://github.com/rnwolfe/rivr/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/rnwolfe/rivr?sort=semver)](https://github.com/rnwolfe/rivr/releases/latest)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Agent CLI Guidelines: Full](https://aclig.dev/badge/agent-cli-guidelines-full.svg)](https://aclig.dev/conformance/)
 
-## Why a CLI (not an MCP server)
+![rivr demo](./demo/rivr.gif)
 
-No maintained general-purpose Amazon-product-search CLI exists — and the official Product
-Advertising API (PA-API 5.0) was retired in May 2026. `rivr` fills that gap with a tool an
-agent can drive in a hot loop at near-zero token cost.
+</div>
+
+## Why rivr
+
+- **Read-only by design.** No cart, no checkout, no mutations. Every result is structured data
+  plus a canonical `/dp/<ASIN>` deep link — the hand-off point where a human buys in their
+  browser. There's no destructive action for an agent to misfire.
+- **Built for agents, not just humans.** `--json` everywhere, `schema --json`, an embedded
+  `agent` guide, `{error,code,remediation,retryAfterSeconds}` errors, a stable exit-code table,
+  and `--limit`/`--select` so responses stay within an agent's context budget.
+- **Prompt-injection fenced.** Titles, descriptions, and review text are attacker-controllable;
+  rivr wraps them `‹untrusted›…‹/untrusted›` by default.
+- **Pluggable backend, one schema.** Swap SerpApi ↔ Rainforest ↔ Creators ↔ scrape without
+  relearning fields. `rivr provider list --json` describes each backend's capability/cost/risk.
 
 ## Install
 
 ```bash
+# Go (any platform; static, no CGO)
 go install github.com/rnwolfe/rivr/cmd/rivr@latest
-# or, once published:
+
+# Homebrew (after first release)
 brew install rnwolfe/tap/rivr
 ```
 
-## Quick start
+Or grab a binary from [Releases](https://github.com/rnwolfe/rivr/releases).
+
+## Quickstart (first success in <60s, no account)
 
 ```bash
-# configure a backend (key read from stdin, never argv)
-printf %s "$SERPAPI_KEY" | rivr auth login --provider serpapi
-
-rivr search "usb-c cable" --json
-rivr item get B0XXXXXXX --detailed --json
-rivr item offers B0XXXXXXX --json
-rivr reviews B0XXXXXXX --json          # third-party backends only
-rivr variations B0XXXXXXX --json
-rivr provider list --json
+# the offline 'stub' backend returns fixtures — no key, no network
+RIVR_PROVIDER=stub rivr search "usb-c cable" --json
+RIVR_PROVIDER=stub rivr provider list --json --select name,keyless,hostedSafe,reviewsScope
+rivr schema | jq '{read_only: .safety.read_only, exit_codes}'
 ```
+
+Then point it at real data — the lowest-friction path is SerpApi's free tier:
+
+```bash
+# one-time, key read from stdin (never argv)
+printf %s "$SERPAPI_KEY" | rivr auth login --provider serpapi
+rivr search "mechanical keyboard" --prime --min-rating 4 --json
+rivr item get B0XXXXXXX --detailed --json
+```
+
+No key at all? On a **home/residential** connection you can use the keyless scraper
+(opt-in, Amazon-ToS caveats apply — see the backend matrix): `RIVR_SCRAPE_ENABLE=1 rivr
+--provider scrape search "usb-c cable" --json`.
 
 ## Providers & authentication
 
@@ -55,10 +78,7 @@ fallback (`RIVR_KEYRING=file` forces it on headless boxes).
 | **serpapi** (default) | sign up → [serpapi.com/manage-api-key](https://serpapi.com/manage-api-key) → `printf %s "$KEY" \| rivr auth login --provider serpapi` | renewing free tier (~250/mo); reviews are a page **sample** |
 | **rainforest** | [Traject Data](https://trajectdata.com/) dashboard → `printf %s "$KEY" \| rivr auth login --provider rainforest` | **full** paginated reviews + real offers |
 | **creators** (official) | Associates Central → Tools → Creators API → `printf '%s\n%s' "$ID" "$SECRET" \| rivr auth login --provider creators` | needs an approved Associate w/ ≥10 sales/30d, else `ASSOCIATE_NOT_ELIGIBLE`; no review text |
-| **scrape** (keyless) | `RIVR_SCRAPE_ENABLE=1` (opt-in) | for **home/residential** use only — modest throttled requests; ToS risk + fragile. Don't run from cloud/hosted IPs (→ use `creators`). |
-
-`rivr auth status --json` tests the active provider; `rivr doctor --json` runs full
-diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the login command.
+| **scrape** (keyless) | `RIVR_SCRAPE_ENABLE=1` (opt-in) | **home/residential only** — modest throttled requests; ToS risk + fragile. Don't run from cloud/hosted IPs (→ use `creators`). |
 
 ### Capability / cost / risk at a glance
 
@@ -70,49 +90,62 @@ diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the lo
 | **scrape** | ✓ | ✗ residential | full | free | Amazon ToS + blocking; home use only |
 | **stub** | ✓ | ✓ | fake | free | not real data (testing) |
 
-Full matrix (capabilities, auth, deployment, "which should I use?") → **[docs/backends.md](./docs/backends.md)**.
-The same data is machine-readable for agents: `rivr provider list --json`.
+Full matrix + "which should I use?" → **[docs/backends.md](./docs/backends.md)**. Machine-readable
+for agents: `rivr provider list --json`.
 
-## Agent-facing surface
+`rivr auth status --json` tests the active provider; `rivr auth logout` removes **local** creds
+only (revoke at the provider to invalidate server-side); `rivr doctor --json` runs full
+diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the login command.
 
-- `rivr schema` — machine-readable command tree, exit codes, providers, live safety state.
-- `rivr agent` — prints the embedded `SKILL.md` (the agent contract; no repo/network needed).
-- `rivr doctor --json` — setup diagnostics.
+## Commands
 
-## Safety
+```bash
+rivr search <query>          # keyword search (--category --prime --min-rating --min/max-price --sort)
+rivr item get <ASIN>...      # product detail (--detailed adds bullets/specs)
+rivr item offers <ASIN>      # live offers / buybox / availability
+rivr reviews <ASIN>          # customer reviews (scope: full | sample)
+rivr variations <ASIN>       # size/color/style variations
+rivr browse <node-id>        # category (browse-node) tree  [creators only]
+rivr provider list           # backends + capability/cost/risk
+rivr auth login|status|logout|refresh
+rivr doctor                  # diagnostics
+rivr schema                  # machine-readable command tree, flags, exit codes, safety
+rivr agent                   # print the embedded agent guide (SKILL.md)
+```
 
-- **Read-only.** No cart/order/mutation surface. Mutation flags exist for contract
-  uniformity but are no-ops.
-- **Untrusted text is fenced.** Titles, descriptions, features, and review bodies — all
-  attacker-controllable — are wrapped `‹untrusted›…‹/untrusted›` by default. Disable with
-  `--no-wrap-untrusted`.
-- **Secrets** are read from stdin/env and stored in the OS keyring, never passed as flags.
-
-## Affiliate attribution (how rivr is funded)
-
-Product deep links are tagged with an Amazon Associates ID by default. If a referred link
-leads to a purchase, Amazon pays the project a small referral fee — **the buyer pays nothing
-extra**. This funds development and helps the project meet the Amazon Creators API's
-qualified-sales minimum that keeps official-API access alive.
-
-It is fully transparent and in your control:
-
-- The active tag is visible in every `url`, in `rivr doctor`, and in `rivr schema`.
-- Use your own: `--associate-tag <your-id>` (or `RIVR_ASSOCIATE_TAG`).
-- Turn it off: `--no-associate-tag` (or `RIVR_NO_ASSOCIATE_TAG`).
-
-_As an Amazon Associate the maintainer earns from qualifying purchases._
+Global flags: `--json`/`--format json|plain|tsv`, `--select a,b.c`, `--limit N`, `--detailed`,
+`--provider`, `--associate-tag`/`--no-associate-tag`, `--no-wrap-untrusted`, `--no-input`.
 
 ## Exit codes
 
 `0` ok · `2` usage · `3` empty results · `4` auth required · `5` not found ·
-`6` permission / `ASSOCIATE_NOT_ELIGIBLE` · `7` rate limited · `8` retryable ·
-`10` config · `11` unsupported by provider · `13` input required. Full table: `rivr schema`.
+`6` permission / `ASSOCIATE_NOT_ELIGIBLE` · `7` rate limited / blocked · `8` retryable ·
+`9` upstream / schema drift · `10` config · `11` unsupported by provider · `13` input required.
+Full table: `rivr schema`.
 
-## Development
+## Affiliate attribution (how rivr is funded)
 
-See [AGENTS.md](./AGENTS.md). Build/test: `go build ./... && go test ./...`.
+Product deep links are tagged with an Amazon Associates ID by default — if a referred link
+leads to a purchase, Amazon pays the project a small referral fee, **the buyer pays nothing
+extra**. It's fully transparent and in your control: the active tag is in every `url`, in
+`rivr doctor`, and in `rivr schema`. Use your own with `--associate-tag <id>`, or disable with
+`--no-associate-tag`.
+
+_As an Amazon Associate the maintainer earns from qualifying purchases._
+
+## Safety
+
+- **Read-only.** No cart/order/mutation surface; the deep link is the action boundary.
+- **Untrusted text fenced** by default (`--no-wrap-untrusted` to disable).
+- **Secrets** via stdin/env → OS keyring (`0600` file fallback); never argv; redacted in output.
+
+See [SECURITY.md](./SECURITY.md) for the secret-handling threat model.
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) and [AGENTS.md](./AGENTS.md). Build/test:
+`go build ./... && go vet ./... && go test ./...`.
 
 ## License
 
-MIT
+[MIT](./LICENSE) © Ryan Wolfe

@@ -11,6 +11,11 @@
 node_modules/
 .astro/
 .vercel/
+site/dist/
+site/.astro/
+
+# demo scratch (keep demo/rivr.tape + demo/rivr.gif)
+demo/_*
 
 # Editor / OS
 .DS_Store

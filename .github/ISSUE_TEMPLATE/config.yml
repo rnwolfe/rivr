@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / idea
+    url: https://github.com/rnwolfe/rivr/discussions
+    about: Ask questions and share ideas in Discussions.
+  - name: Security vulnerability
+    url: https://github.com/rnwolfe/rivr/security/advisories/new
+    about: Report security issues privately — never in a public issue.

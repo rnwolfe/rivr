@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use rivr, please cite it using these metadata."
+title: rivr
+abstract: >-
+  An agent-focused, read-only CLI for Amazon Shopping search and data retrieval, with a
+  pluggable backend (SerpApi, Rainforest, official Amazon Creators API, or keyless
+  scraping), built to the Agent CLI Guidelines.
+type: software
+authors:
+  - given-names: Ryan
+    family-names: Wolfe
+repository-code: "https://github.com/rnwolfe/rivr"
+url: "https://rivr.sh"
+license: MIT
+keywords:
+  - cli
+  - ai-agents
+  - llm-tools
+  - amazon
+  - go
