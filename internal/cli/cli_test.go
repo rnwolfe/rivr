@@ -221,6 +221,41 @@ func TestAuthStatusUnconfigured(t *testing.T) {
 	}
 }
 
+func TestItemCompare(t *testing.T) {
+	noColor(t)
+	out, _, code := run(t, "item", "compare", "B0AAA", "B0BBB", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0\n%s", code, out)
+	}
+	var res map[string]any
+	if err := json.Unmarshal([]byte(out), &res); err != nil {
+		t.Fatalf("not JSON: %v", err)
+	}
+	items, _ := res["items"].([]any)
+	if len(items) != 2 {
+		t.Fatalf("want 2 items, got %d", len(items))
+	}
+	if _, ok := res["summary"]; !ok {
+		t.Fatalf("compare missing best-of summary")
+	}
+}
+
+func TestItemCompareNeedsTwo(t *testing.T) {
+	noColor(t)
+	_, _, code := run(t, "item", "compare", "B0AAA", "--json")
+	if code != 2 {
+		t.Fatalf("exit = %d, want 2 (usage)", code)
+	}
+}
+
+func TestSearchBadges(t *testing.T) {
+	noColor(t)
+	out, _, _ := run(t, "search", "x", "--json")
+	if !strings.Contains(out, "Amazon's Choice") {
+		t.Fatalf("expected a badge in search output:\n%s", out)
+	}
+}
+
 func TestVersionFlag(t *testing.T) {
 	out, _, code := run(t, "--version")
 	if code != 0 {

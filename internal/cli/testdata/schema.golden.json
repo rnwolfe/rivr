@@ -134,6 +134,16 @@
             ],
             "help": "Get live offers / buybox / availability for an ASIN.",
             "name": "offers"
+          },
+          {
+            "args": [
+              {
+                "help": "Two or more product ASINs to compare.",
+                "name": "asin"
+              }
+            ],
+            "help": "Compare two or more ASINs side-by-side with a best-of summary.",
+            "name": "compare"
           }
         ]
       },

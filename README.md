@@ -105,6 +105,7 @@ diagnostics. A missing credential returns `AUTH_REQUIRED` (exit 4) naming the lo
 rivr search <query>          # keyword search (--category --prime --min-rating --min/max-price --sort)
 rivr item get <ASIN>...      # product detail (--detailed adds bullets/specs)
 rivr item offers <ASIN>      # live offers / buybox / availability
+rivr item compare <ASIN>...  # side-by-side + best-of summary (cheapest/highest-rated/most-reviewed)
 rivr reviews <ASIN>          # customer reviews (scope: full | sample)
 rivr variations <ASIN>       # size/color/style variations
 rivr browse <node-id>        # category (browse-node) tree  [creators only]

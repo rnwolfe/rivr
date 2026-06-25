@@ -60,6 +60,9 @@ type SearchItem struct {
 	Prime       bool    `json:"prime"`
 	URL         string  `json:"url"`
 	Image       string  `json:"image"`
+	// Badges are trust/merchandising signals like "Amazon's Choice" or "Best Seller".
+	// Population is provider-dependent (best-effort); absent means unknown, not "none".
+	Badges []string `json:"badges,omitempty"`
 }
 
 type Item struct {

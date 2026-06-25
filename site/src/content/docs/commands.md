@@ -25,6 +25,7 @@ always-current machine-readable source.
 rivr search <query>      # --category --prime --min-rating --min-price --max-price --sort --cursor
 rivr item get <ASIN>...  # one or more ASINs; --detailed
 rivr item offers <ASIN>  # live offers / buybox / availability
+rivr item compare <ASIN>...  # side-by-side + {cheapest, highestRated, mostReviewed} summary
 rivr reviews <ASIN>      # --cursor; response carries scope: full | sample
 rivr variations <ASIN>   # size/color/style
 rivr browse <node-id>    # category (browse-node) tree — creators backend only

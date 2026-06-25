@@ -180,6 +180,7 @@ func (s *scrape) Search(ctx context.Context, query string, opts SearchOpts) (*Se
 			Prime:       sel.Find("i.a-icon-prime").Length() > 0,
 			URL:         u,
 			Image:       img,
+			Badges:      scrapeBadges(sel),
 		}
 		res.Items = append(res.Items, item)
 	})
@@ -278,6 +279,18 @@ func firstNonEmpty(vals ...string) string {
 		}
 	}
 	return ""
+}
+
+// scrapeBadges collects merchandising badges ("Amazon's Choice", "Best Seller") from a search
+// row. Best-effort: the badge label sits in a `.a-badge-text` span. Empty when none found.
+func scrapeBadges(sel *goquery.Selection) []string {
+	var out []string
+	sel.Find("span.a-badge-text, span.a-badge-label-inner").Each(func(_ int, b *goquery.Selection) {
+		if t := strings.TrimSpace(b.Text()); t != "" {
+			out = append(out, t)
+		}
+	})
+	return out
 }
 
 // scrapeReviewCount extracts a search row's review count, which Amazon renders inconsistently

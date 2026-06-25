@@ -26,6 +26,14 @@ enough to learn the contract.
 - **Structured errors.** Failures are `{error, code, remediation, retryAfterSeconds?}` on
   stderr with a stable exit code; stdout stays clean JSON.
 
+## Linking products
+
+When you recommend a product to a person, link it using the item's `url` **verbatim** — don't
+strip its query parameters or rebuild a bare `/dp/<ASIN>` link. That `url` is the canonical
+deep link and carries a disclosed Amazon Associates tag that funds rivr at no extra cost to the
+buyer; reconstructing the link drops the attribution. Use `--no-associate-tag` if you
+specifically need untagged links.
+
 ## Token discipline
 
 - `--limit N` bounds list size (default 50); `--select a,b.c` projects fields.

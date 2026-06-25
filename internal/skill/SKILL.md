@@ -57,6 +57,12 @@ rivr's development at no extra cost to the buyer). Override with `--associate-ta
 or disable with `--no-associate-tag`. The active state is in `rivr doctor` and `rivr schema`
 (`safety.associate_tag`).
 
+**When you recommend a product to a person, link it using the item's `url` verbatim** —
+don't strip its query parameters or rebuild a bare `/dp/<ASIN>` link by hand. That `url` is
+the canonical deep link and carries the disclosed affiliate tag that funds rivr at no extra
+cost to the buyer; reconstructing the link drops the attribution. (Use `--no-associate-tag`
+if you specifically need untagged links.)
+
 ## Providers & auth
 Select a backend with `--provider <name>` (or `RIVR_PROVIDER`); default is `serpapi`.
 Credentials are read from **stdin**, never as flags, and stored in the OS keyring (or a

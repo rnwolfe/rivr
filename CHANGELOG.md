@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-25
+
+### Added
+- `item compare <ASIN>...` — fetch multiple ASINs and return them with a best-of summary
+  (`cheapest` / `highestRated` / `mostReviewed`), so agents don't hand-assemble comparisons.
+- `badges` field on search results (e.g. "Amazon's Choice", "Best Seller") — a trust signal
+  for "find the best." Population is provider-dependent (best-effort).
+
+### Changed
+- Embedded `SKILL.md` + docs now instruct driving agents to surface the item `url` **verbatim**
+  (so the affiliate tag survives instead of being dropped by a hand-rebuilt link), and surface
+  the search filters (`--sort`/`--min-rating`/`--prime`) more prominently.
+
 ## [0.1.3] - 2026-06-25
 
 ### Fixed
@@ -42,6 +55,7 @@ All notable changes to this project are documented here. The format is based on
 - Disclosed, opt-out built-in Amazon Associates tag on product deep links
   (`--associate-tag` / `--no-associate-tag`).
 
-[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.2.0
 [0.1.3]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.3
 [0.1.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.0

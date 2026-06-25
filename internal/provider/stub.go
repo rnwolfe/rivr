@@ -21,7 +21,7 @@ func (s *stub) Configured() bool { return true }
 
 func (s *stub) Search(_ context.Context, query string, opts SearchOpts) (*SearchResult, error) {
 	items := []SearchItem{
-		{ASIN: "B0STUB0001", Title: "[stub] " + query + " — Example Product A", Price: 12.99, Currency: "USD", Rating: 4.6, ReviewCount: 21034, Prime: true, URL: "https://www.amazon.com/dp/B0STUB0001", Image: "https://example.invalid/a.jpg"},
+		{ASIN: "B0STUB0001", Title: "[stub] " + query + " — Example Product A", Price: 12.99, Currency: "USD", Rating: 4.6, ReviewCount: 21034, Prime: true, URL: "https://www.amazon.com/dp/B0STUB0001", Image: "https://example.invalid/a.jpg", Badges: []string{"Amazon's Choice"}},
 		{ASIN: "B0STUB0002", Title: "[stub] " + query + " — Example Product B", Price: 24.50, Currency: "USD", Rating: 4.2, ReviewCount: 813, Prime: false, URL: "https://www.amazon.com/dp/B0STUB0002", Image: "https://example.invalid/b.jpg"},
 	}
 	return &SearchResult{
