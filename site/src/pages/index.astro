@@ -79,10 +79,14 @@ const backends = [
         <h1 class="reveal">A read-only Amazon Shopping CLI<br /><span class="grad">built for AI agents.</span></h1>
         <p class="lede reveal">Search products and pull detail, offers, reviews, and variations through <strong>one normalized schema</strong> over a pluggable backend — SerpApi, Rainforest, the official Creators API, or keyless scraping. <a href="https://aclig.dev/">Agent CLI Guidelines</a> baked in.</p>
         <div class="cta reveal">
-          <code class="install" id="install">curl -fsSL https://rivr.sh/install.sh | sh</code>
-          <button class="copy" data-copy="curl -fsSL https://rivr.sh/install.sh | sh" aria-label="Copy install command">copy</button>
+          <code class="install" id="install">brew install rnwolfe/tap/rivr</code>
+          <button class="copy" data-copy="brew install rnwolfe/tap/rivr" aria-label="Copy install command">copy</button>
         </div>
-        <p class="alt reveal">or <code>brew install rnwolfe/tap/rivr</code> · <code>go install github.com/rnwolfe/rivr/cmd/rivr@latest</code></p>
+        <p class="alt reveal">macOS &amp; Linux · or
+          <code>go install github.com/rnwolfe/rivr/cmd/rivr@latest</code> ·
+          <code>curl -fsSL https://rivr.sh/install.sh | sh</code> ·
+          <a href={`${repo}/releases`}>prebuilt binaries</a>
+        </p>
         <div class="links reveal">
           <a class="btn primary" href="/getting-started">Get started →</a>
           <a class="btn" href={repo}>Star on GitHub</a>

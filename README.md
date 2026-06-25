@@ -36,14 +36,14 @@ fencing, and stdin/keyring secrets.
 ## Install
 
 ```bash
-# curl (macOS / Linux) — downloads a release binary, verifies its SHA-256, installs to ~/.local/bin
-curl -fsSL https://rivr.sh/install.sh | sh
-
-# Homebrew (macOS / Linux)
+# Homebrew (macOS / Linux) — recommended
 brew install rnwolfe/tap/rivr
 
 # Go (any platform; static, no CGO)
 go install github.com/rnwolfe/rivr/cmd/rivr@latest
+
+# Shell script (macOS / Linux) — downloads a release binary, verifies its SHA-256, installs to ~/.local/bin
+curl -fsSL https://rivr.sh/install.sh | sh
 ```
 
 Or grab a prebuilt binary (linux/macOS/windows, amd64/arm64) from
