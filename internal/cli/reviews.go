@@ -35,6 +35,7 @@ func (c *ReviewsCmd) Run(rt *Runtime) error {
 	if rt.Cfg.Limit > 0 && len(res.Reviews) > rt.Cfg.Limit {
 		rt.Out.Info("note: %d reviews truncated to --limit=%d (page with --cursor)", len(res.Reviews), rt.Cfg.Limit)
 		res.Reviews = res.Reviews[:rt.Cfg.Limit]
+		res.Truncated = true
 	}
 	for i := range res.Reviews {
 		res.Reviews[i].Title = rt.Fence(res.Reviews[i].Title)

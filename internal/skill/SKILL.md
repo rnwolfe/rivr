@@ -27,10 +27,11 @@ Amazon Creators API.
   `--prime`, `--min-price`/`--max-price`, `--sort`. Page with `--cursor <nextCursor>`.
 - `rivr item get <ASIN> [<ASIN>...] --json` — full product detail (add `--detailed`).
 - `rivr item offers <ASIN> --json` — live offers / buybox / availability.
-- `rivr reviews <ASIN> --json` — customer reviews. Only third-party backends serve text; the
-  official Creators API returns `UNSUPPORTED_BY_PROVIDER` (exit 11). The response carries a
-  `scope` field: `"full"` (Rainforest, paginated) or `"sample"` (SerpApi product-page sample —
-  NOT the whole corpus). Don't treat a `sample` as complete.
+- `rivr reviews <ASIN> --json` — customer reviews. Only **serpapi** (sample) and **rainforest**
+  (full) serve text; the official **creators** API and the keyless **scrape** backend return
+  `UNSUPPORTED_BY_PROVIDER` (exit 11) — the official API has no review text and Amazon walls the
+  scrape reviews page. The response carries a `scope` field: `"full"` (Rainforest, paginated) or
+  `"sample"` (SerpApi product-page sample — NOT the whole corpus). Don't treat a `sample` as complete.
 - `rivr variations <ASIN> --json` — size/color/style variations.
 - `rivr browse <node-id> --json` — category (browse-node) tree. **Creators backend only.**
 
@@ -38,7 +39,7 @@ Amazon Creators API.
 | capability | serpapi (default) | rainforest | creators | scrape (opt-in) |
 |---|---|---|---|---|
 | search / item / offers | ✓ | ✓ | ✓ | ✓ |
-| reviews | ✓ (sample) | ✓ (full) | ✗ | ✓ (full) |
+| reviews | ✓ (sample) | ✓ (full) | ✗ | ✗ (walled) |
 | variations | ✓ | ✓ | ✓ | ✗ |
 | browse | ✗ | ✗ | ✓ | ✗ |
 

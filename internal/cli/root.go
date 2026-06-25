@@ -18,6 +18,7 @@ import (
 	"github.com/rnwolfe/rivr/internal/fence"
 	"github.com/rnwolfe/rivr/internal/output"
 	"github.com/rnwolfe/rivr/internal/provider"
+	"github.com/rnwolfe/rivr/internal/version"
 )
 
 // CLI is the kong grammar. Global flags are the universal agent-CLI contract surface plus
@@ -87,7 +88,13 @@ func (rt *Runtime) Provider() (provider.Provider, error) {
 		if u, ok := p.(provider.Unconfigured); ok {
 			return nil, u.UnconfiguredErr() // backend-specific guidance (e.g. scrape opt-in)
 		}
-		return nil, errs.AuthRequired(p.Name())
+		e := errs.AuthRequired(p.Name())
+		// If the keyless scraper is opted-in but a credentialed default was selected, the
+		// agent almost certainly forgot `--provider scrape` — point them at it.
+		if os.Getenv("RIVR_SCRAPE_ENABLE") == "1" && p.Name() != "scrape" {
+			e.Remediation += "; or use the keyless backend you enabled: --provider scrape"
+		}
+		return nil, e
 	}
 	// Inject the resolved Associates tag into backends that need it (official Creators API
 	// requires partnerTag on every request).
@@ -166,6 +173,18 @@ See 'rivr agent' for the full agent contract, 'rivr schema' for the machine-read
 
 // Run parses args and dispatches, returning the process exit code.
 func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
+	// `--version`/`-V` is the most common first probe; honor it as a flag (not just the
+	// `version` subcommand) before kong's required-subcommand parsing rejects it.
+	for _, a := range args {
+		if a == "--" {
+			break
+		}
+		if a == "--version" || a == "-V" {
+			fmt.Fprintln(stdout, version.String())
+			return errs.ExitOK
+		}
+	}
+
 	var cfg CLI
 	helpShown := false
 	parser, err := kong.New(&cfg,

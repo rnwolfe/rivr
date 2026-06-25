@@ -17,7 +17,7 @@ choose a backend programmatically (e.g. `rivr provider list --json --select name
 | search | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
 | item get | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
 | offers | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
-| reviews | ✓ sample | ✓ full | ✗ | ✓ full | ✓ (fake) |
+| reviews | ✓ sample | ✓ full | ✗ | ✗ (walled) | ✓ (fake) |
 | variations | ✓ | ✓ | ✓ | ✗ | ✓ (fake) |
 | browse nodes | ✗ | ✗ | ✓ | ✗ | ✓ (fake) |
 
@@ -52,8 +52,8 @@ corpus).
   use case.
 - **Hosted / cloud / datacenter:** never `scrape` (it gets blocked). Use `creators` if you're
   an eligible Associate, otherwise `serpapi`/`rainforest`.
-- **Need full review text:** `rainforest` (or `scrape`); `serpapi` gives only a sample;
-  `creators` gives none.
+- **Need review text:** `rainforest` (full) or `serpapi` (sample); `creators` and `scrape`
+  return none (the official API has no review text; Amazon walls the scrape reviews page).
 - **Need browse-node trees:** `creators` only.
 - **Lowest friction to try:** `serpapi` free key, or `scrape` keyless at home.
 - **Cleanest data licensing:** `creators` (first-party), if eligible.

@@ -17,7 +17,7 @@ programmatically.
 | search | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
 | item get | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
 | offers | ✓ | ✓ | ✓ | ✓ | ✓ (fake) |
-| reviews | ✓ sample | ✓ full | ✗ | ✓ full | ✓ (fake) |
+| reviews | ✓ sample | ✓ full | ✗ | ✗ (walled) | ✓ (fake) |
 | variations | ✓ | ✓ | ✓ | ✗ | ✓ (fake) |
 | browse nodes | ✗ | ✗ | ✓ | ✗ | ✓ (fake) |
 
@@ -48,7 +48,7 @@ A capability a backend lacks returns `UNSUPPORTED_BY_PROVIDER` (exit 11). Review
   `serpapi` (free tier) if you'd rather not scrape. This is the primary use case.
 - **Hosted / cloud / datacenter:** never `scrape`. Use `creators` if you're an eligible
   Associate, otherwise `serpapi`/`rainforest`.
-- **Need full review text:** `rainforest` (or `scrape`); `serpapi` is a sample; `creators` none.
+- **Need review text:** `rainforest` (full) or `serpapi` (sample); `creators` and `scrape` return none.
 - **Need browse-node trees:** `creators` only.
 
 ## Choosing programmatically

@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-06-25
+
+### Fixed
+- **scrape**: search results always include a product `url` (synthesized from the ASIN when
+  Amazon's DOM omits the link) and a more robust `reviewCount` (multiple selector fallbacks).
+- **scrape**: `reviews` now correctly reports `UNSUPPORTED_BY_PROVIDER` (Amazon walls the
+  reviews page) instead of returning a silent empty list; capability matrix updated.
+- **doctor** no longer fails when the default provider is unconfigured but the keyless
+  `scrape` backend is enabled — it reports the keyless path as usable.
+
+### Added
+- `--version` flag (the common probe; complements the `version` subcommand).
+- `truncated` field on `search`/`reviews` JSON when results exceed `--limit` (in-band signal
+  for agents piping straight to `jq`).
+- `search` results are de-duplicated by ASIN.
+- `AUTH_REQUIRED` suggests `--provider scrape` when `RIVR_SCRAPE_ENABLE=1` is set.
+
 ## [0.1.0] - 2026-06-24
 
 ### Added
@@ -25,5 +42,6 @@ All notable changes to this project are documented here. The format is based on
 - Disclosed, opt-out built-in Amazon Associates tag on product deep links
   (`--associate-tag` / `--no-associate-tag`).
 
-[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.3
 [0.1.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.0

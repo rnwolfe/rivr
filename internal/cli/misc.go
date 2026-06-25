@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"os"
+
 	"github.com/alecthomas/kong"
 
 	"github.com/rnwolfe/rivr/internal/auth"
@@ -23,10 +25,18 @@ func (c *DoctorCmd) Run(rt *Runtime) error {
 	}
 	p, known := provider.Select(def)
 	configured := known && p.Configured()
+	// The keyless scrape backend (opt-in) is a usable path even when the default provider
+	// has no credentials — so don't fail the credentials check if it's available.
+	scrapeReady := os.Getenv("RIVR_SCRAPE_ENABLE") == "1"
 
+	credOK := configured || scrapeReady
+	credText := credDetail(def, configured)
+	if !configured && scrapeReady {
+		credText = def + " unconfigured, but the keyless scrape backend is enabled (use --provider scrape)"
+	}
 	checks := []map[string]any{
 		{"name": "default_provider", "ok": known, "detail": "active provider: " + def},
-		{"name": "credentials", "ok": configured, "detail": credDetail(def, configured)},
+		{"name": "credentials", "ok": credOK, "detail": credText},
 	}
 
 	// Connectivity / credential validity — but never deepen an active block.

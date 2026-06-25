@@ -43,8 +43,10 @@ func newScrape() *scrape {
 func (s *scrape) Name() string { return "scrape" }
 
 func (s *scrape) Capabilities() []string {
-	// Variations (twister) and browse-nodes are not parsed by the scraper.
-	return []string{CapSearch, CapItem, CapOffers, CapReviews}
+	// Reviews are NOT supported: Amazon serves /product-reviews/ behind a login/bot wall, so
+	// keyless scraping reliably returns nothing — better to declare it unsupported than to
+	// return a silent empty list. Variations (twister) and browse-nodes aren't parsed either.
+	return []string{CapSearch, CapItem, CapOffers}
 }
 
 func (s *scrape) Configured() bool { return scrapeEnabled() }
@@ -162,15 +164,21 @@ func (s *scrape) Search(ctx context.Context, query string, opts SearchOpts) (*Se
 		}
 		href, _ := sel.Find("h2 a").Attr("href")
 		img, _ := sel.Find("img.s-image").Attr("src")
+		// Amazon's DOM drifts; the URL must never be empty, so fall back to the canonical
+		// /dp/<ASIN> form (the deep link is rivr's whole point).
+		u := s.absURL(href)
+		if u == "" {
+			u = s.base() + "/dp/" + asin
+		}
 		item := SearchItem{
 			ASIN:        asin,
 			Title:       strings.TrimSpace(title),
 			Price:       parsePrice(sel.Find("span.a-price span.a-offscreen").First().Text()),
 			Currency:    currencyForDomain(s.domain),
 			Rating:      parseLeadingFloat(sel.Find("span.a-icon-alt").First().Text()),
-			ReviewCount: parseCount(sel.Find("span.a-size-base.s-underline-text").First().Text()),
+			ReviewCount: scrapeReviewCount(sel),
 			Prime:       sel.Find("i.a-icon-prime").Length() > 0,
-			URL:         s.absURL(href),
+			URL:         u,
 			Image:       img,
 		}
 		res.Items = append(res.Items, item)
@@ -235,32 +243,16 @@ func (s *scrape) GetOffers(ctx context.Context, asin string) (*OffersResult, err
 	return res, nil
 }
 
-func (s *scrape) GetReviews(ctx context.Context, asin, cursor string) (*ReviewsResult, error) {
-	page := 1
-	if cursor != "" {
-		if p, e := strconv.Atoi(cursor); e == nil && p > 0 {
-			page = p
-		}
+// GetReviews is unsupported on scrape: Amazon's /product-reviews/ page is login/bot-walled,
+// so keyless scraping returns nothing. Return a clear, structured error instead of an empty
+// list that an agent would mistake for "this product has no reviews".
+func (s *scrape) GetReviews(_ context.Context, _, _ string) (*ReviewsResult, error) {
+	if !scrapeEnabled() {
+		return nil, s.notEnabled()
 	}
-	doc, err := s.fetch(ctx, s.base()+"/product-reviews/"+asin+"/?pageNumber="+strconv.Itoa(page))
-	if err != nil {
-		return nil, err
-	}
-	res := &ReviewsResult{SchemaVersion: SchemaVersion, Provider: s.Name(), ASIN: asin, Scope: "full"}
-	doc.Find("div[data-hook=review]").Each(func(_ int, sel *goquery.Selection) {
-		res.Reviews = append(res.Reviews, Review{
-			Rating:   int(parseLeadingFloat(sel.Find("i[data-hook=review-star-rating] span, i[data-hook=cmps-review-star-rating] span").First().Text())),
-			Title:    strings.TrimSpace(sel.Find("a[data-hook=review-title] span").Last().Text()),
-			Body:     strings.TrimSpace(sel.Find("span[data-hook=review-body] span").First().Text()),
-			Author:   strings.TrimSpace(sel.Find("span.a-profile-name").First().Text()),
-			Date:     strings.TrimSpace(sel.Find("span[data-hook=review-date]").First().Text()),
-			Verified: sel.Find("span[data-hook=avp-badge]").Length() > 0,
-		})
-	})
-	if len(res.Reviews) > 0 && page < 10 {
-		res.NextCursor = strconv.Itoa(page + 1)
-	}
-	return res, nil
+	return nil, errs.New(errs.ExitUnsupported, "UNSUPPORTED_BY_PROVIDER",
+		"review text is not available via the keyless scrape backend (Amazon walls /product-reviews/)",
+		"use --provider rainforest for full reviews, or --provider serpapi for a sample")
 }
 
 func (s *scrape) GetVariations(_ context.Context, _ string) (*VariationsResult, error) {
@@ -286,4 +278,27 @@ func firstNonEmpty(vals ...string) string {
 		}
 	}
 	return ""
+}
+
+// scrapeReviewCount extracts a search row's review count, which Amazon renders inconsistently
+// across DOM variants. Try the known shapes in order; the rating-row aria-label is the most
+// stable (e.g. aria-label="2,578"). Returns 0 if none match (degrade, don't break).
+func scrapeReviewCount(sel *goquery.Selection) int {
+	// 1) the count link next to the stars, e.g. <a aria-label="2,578 ratings">
+	if v, ok := sel.Find("a[aria-label$='ratings'], a[aria-label$='reviews']").First().Attr("aria-label"); ok {
+		if n := parseCount(v); n > 0 {
+			return n
+		}
+	}
+	// 2) the second aria-label in the rating row (first is the stars, second is the count)
+	if v, ok := sel.Find("span[aria-label]").Eq(1).Attr("aria-label"); ok {
+		if n := parseCount(v); n > 0 {
+			return n
+		}
+	}
+	// 3) legacy underline-text span
+	if n := parseCount(sel.Find("span.a-size-base.s-underline-text").First().Text()); n > 0 {
+		return n
+	}
+	return 0
 }

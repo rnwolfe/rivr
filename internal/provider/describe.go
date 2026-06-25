@@ -65,8 +65,8 @@ func (s *scrape) Describe() Descriptor {
 		Name: "scrape", Summary: "Keyless amazon.com scraping — opt-in, residential use only.",
 		Keyless: true, Auth: "none (opt-in: RIVR_SCRAPE_ENABLE=1)", HostedSafe: false,
 		Cost:         "Free (no API key); cost is your bandwidth/IP + selector upkeep",
-		Risk:         "Amazon ToS; bot-detection/blocking; fragile DOM; do NOT use from cloud/hosted IPs",
-		ReviewsScope: "full", Capabilities: s.Capabilities(), Official: false,
+		Risk:         "Amazon ToS; bot-detection/blocking; fragile DOM; no review text (walled); do NOT use from cloud/hosted IPs",
+		ReviewsScope: "none", Capabilities: s.Capabilities(), Official: false,
 	}
 }
 

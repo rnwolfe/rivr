@@ -33,6 +33,8 @@ func (c *SearchCmd) Run(rt *Runtime) error {
 	if err != nil {
 		return err
 	}
+	// De-duplicate by ASIN (some backends repeat sponsored/organic rows), preserving order.
+	res.Items = dedupeByASIN(res.Items)
 	if len(res.Items) == 0 {
 		return errs.Empty("products")
 	}
@@ -40,6 +42,7 @@ func (c *SearchCmd) Run(rt *Runtime) error {
 	if rt.Cfg.Limit > 0 && len(res.Items) > rt.Cfg.Limit {
 		rt.Out.Info("note: %d results truncated to --limit=%d (page with --cursor)", len(res.Items), rt.Cfg.Limit)
 		res.Items = res.Items[:rt.Cfg.Limit]
+		res.Truncated = true // in-band signal for agents piping straight to jq
 	}
 	for i := range res.Items {
 		res.Items[i].Title = rt.Fence(res.Items[i].Title)
@@ -47,4 +50,18 @@ func (c *SearchCmd) Run(rt *Runtime) error {
 	}
 	res.Count = len(res.Items)
 	return rt.Out.Emit(res)
+}
+
+// dedupeByASIN removes repeated ASINs, keeping first occurrence and order.
+func dedupeByASIN(items []provider.SearchItem) []provider.SearchItem {
+	seen := make(map[string]bool, len(items))
+	out := items[:0]
+	for _, it := range items {
+		if it.ASIN != "" && seen[it.ASIN] {
+			continue
+		}
+		seen[it.ASIN] = true
+		out = append(out, it)
+	}
+	return out
 }

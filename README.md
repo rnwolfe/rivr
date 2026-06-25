@@ -89,7 +89,7 @@ fallback (`RIVR_KEYRING=file` forces it on headless boxes).
 | **serpapi** (default) | ✗ | ✓ | sample | free tier + paid | paid beyond free tier; sample reviews |
 | **rainforest** | ✗ | ✓ | full | paid (~$25/mo+) | paid per request |
 | **creators** (official) | ✗ | ✓ | none | free* | *needs eligible Associate; no review text |
-| **scrape** | ✓ | ✗ residential | full | free | Amazon ToS + blocking; home use only |
+| **scrape** | ✓ | ✗ residential | none | free | Amazon ToS + blocking; no review text; home use only |
 | **stub** | ✓ | ✓ | fake | free | not real data (testing) |
 
 Full matrix + "which should I use?" → **[docs/backends.md](./docs/backends.md)**. Machine-readable

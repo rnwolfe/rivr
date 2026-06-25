@@ -45,6 +45,9 @@ type SearchResult struct {
 	NextCursor    string       `json:"nextCursor,omitempty"`
 	Count         int          `json:"count"`
 	Limit         int          `json:"limit"`
+	// Truncated is true when more results existed than --limit returned (the same signal as
+	// the stderr note, but in-band so agents piping straight to jq don't miss it).
+	Truncated bool `json:"truncated,omitempty"`
 }
 
 type SearchItem struct {
@@ -104,6 +107,7 @@ type ReviewsResult struct {
 	Scope      string   `json:"scope,omitempty"`
 	Reviews    []Review `json:"reviews"`
 	NextCursor string   `json:"nextCursor,omitempty"`
+	Truncated  bool     `json:"truncated,omitempty"`
 }
 
 type Review struct {

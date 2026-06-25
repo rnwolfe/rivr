@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/rnwolfe/rivr/internal/provider"
 )
 
 func run(t *testing.T, args ...string) (string, string, int) {
@@ -216,6 +218,39 @@ func TestAuthStatusUnconfigured(t *testing.T) {
 	out, _, code := run(t, "auth", "status", "--provider", "serpapi", "--json")
 	if code != 4 {
 		t.Fatalf("exit = %d, want 4 (auth required)\n%s", code, out)
+	}
+}
+
+func TestVersionFlag(t *testing.T) {
+	out, _, code := run(t, "--version")
+	if code != 0 {
+		t.Fatalf("--version exit = %d, want 0", code)
+	}
+	if strings.TrimSpace(out) == "" {
+		t.Fatalf("--version printed nothing")
+	}
+}
+
+func TestDedupeByASIN(t *testing.T) {
+	in := []provider.SearchItem{{ASIN: "A"}, {ASIN: "B"}, {ASIN: "A"}, {ASIN: "C"}, {ASIN: "B"}}
+	out := dedupeByASIN(in)
+	if len(out) != 3 || out[0].ASIN != "A" || out[1].ASIN != "B" || out[2].ASIN != "C" {
+		t.Fatalf("dedupe wrong: %+v", out)
+	}
+}
+
+func TestSearchTruncatedFlag(t *testing.T) {
+	noColor(t) // stub returns 2 items
+	out, _, code := run(t, "search", "x", "--limit", "1", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0", code)
+	}
+	var res map[string]any
+	if err := json.Unmarshal([]byte(out), &res); err != nil {
+		t.Fatal(err)
+	}
+	if res["truncated"] != true {
+		t.Fatalf("expected truncated:true in JSON, got %v", res["truncated"])
 	}
 }
 
