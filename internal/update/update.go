@@ -7,6 +7,7 @@ package update
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -65,11 +66,15 @@ func fetchLatest(ctx context.Context) (string, error) {
 	defer cancel()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, apiURL(), nil)
 	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "rivr-version-check") // GitHub's REST API rejects requests with no UA
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("release source: %s", resp.Status)
+	}
 	var body struct {
 		TagName string `json:"tag_name"`
 	}

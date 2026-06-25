@@ -57,3 +57,23 @@ func TestCheckUsesEndpointAndCache(t *testing.T) {
 		t.Fatalf("force should re-fetch; hits=%d", hits)
 	}
 }
+
+// TestFetchSetsUserAgent guards the GitHub-API contract: requests with no User-Agent are
+// rejected (HTTP 403), so the version check must always send one.
+func TestFetchSetsUserAgent(t *testing.T) {
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+	var gotUA string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotUA = r.Header.Get("User-Agent")
+		w.Write([]byte(`{"tag_name":"v0.9.0"}`))
+	}))
+	defer srv.Close()
+	t.Setenv("RIVR_UPDATE_URL", srv.URL)
+
+	if _, _, err := Check(context.Background(), "v0.2.0", true, time.Unix(1_750_000_000, 0)); err != nil {
+		t.Fatal(err)
+	}
+	if gotUA == "" {
+		t.Fatal("version check sent no User-Agent; GitHub's REST API rejects such requests")
+	}
+}
