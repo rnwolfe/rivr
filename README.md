@@ -36,6 +36,9 @@ fencing, and stdin/keyring secrets.
 ## Install
 
 ```bash
+# curl (macOS / Linux) — downloads a release binary, verifies its SHA-256, installs to ~/.local/bin
+curl -fsSL https://rivr.sh/install.sh | sh
+
 # Homebrew (macOS / Linux)
 brew install rnwolfe/tap/rivr
 

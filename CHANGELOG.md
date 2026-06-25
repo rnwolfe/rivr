@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+### Added
+- `install.sh` (served at `https://rivr.sh/install.sh`): `curl -fsSL https://rivr.sh/install.sh | sh`
+  — detects os/arch, downloads the release tarball, **verifies its SHA-256** against
+  `checksums.txt`, installs to `~/.local/bin` (or `$RIVR_INSTALL_DIR`). Function-wrapped for
+  truncation safety.
+
 ## [0.3.0] - 2026-06-25
 
 ### Added

@@ -11,6 +11,9 @@ canonical `/dp/<ASIN>` deep link.
 ## Install
 
 ```bash
+# curl (macOS / Linux) — verifies the release SHA-256 before installing
+curl -fsSL https://rivr.sh/install.sh | sh
+
 # Homebrew (macOS / Linux)
 brew install rnwolfe/tap/rivr
 
