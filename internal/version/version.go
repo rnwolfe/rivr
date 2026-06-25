@@ -2,6 +2,9 @@ package version
 
 import "runtime/debug"
 
+// Spec is the Agent CLI Guidelines version this tool conforms to (declared in `schema`).
+const Spec = "0.4.0"
+
 // version is a plain literal so -ldflags "-X .../version.version=vX" can override it.
 // It MUST NOT be initialized from a function call (golang/go#64246).
 var version = "dev"

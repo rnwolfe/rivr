@@ -14,7 +14,7 @@ fencing, and stdin/keyring secrets.
 [![ci](https://github.com/rnwolfe/rivr/actions/workflows/ci.yml/badge.svg)](https://github.com/rnwolfe/rivr/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/rnwolfe/rivr?sort=semver)](https://github.com/rnwolfe/rivr/releases/latest)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Agent CLI Guidelines: Full](https://aclig.dev/badge/agent-cli-guidelines-full.svg)](https://aclig.dev/conformance/)
+[![Agent CLI Guidelines v0.4.0: Full](https://aclig.dev/badge/agent-cli-guidelines-full.svg)](https://aclig.dev/conformance/)
 
 ![rivr demo](./demo/rivr.gif)
 
@@ -132,6 +132,13 @@ Global flags: `--json`/`--format json|plain|tsv`, `--select a,b.c`, `--limit N`,
 `6` permission / `ASSOCIATE_NOT_ELIGIBLE` · `7` rate limited / blocked · `8` retryable ·
 `9` upstream / schema drift · `10` config · `11` unsupported by provider · `13` input required.
 Full table: `rivr schema`.
+
+## Conformance
+
+rivr conforms to the [Agent CLI Guidelines](https://aclig.dev/) **v0.4.0** at the **Full**
+level. The contract version is machine-verifiable from the binary — `rivr schema` emits a
+`conformance` block (`{ spec: "agent-cli-guidelines", version: "0.4.0", level: "Full" }`),
+so an agent can confirm the standard it was built against without trusting this README.
 
 ## Affiliate attribution (how rivr is funded)
 

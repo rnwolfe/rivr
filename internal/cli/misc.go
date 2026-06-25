@@ -141,6 +141,9 @@ func (c *SchemaCmd) Run(rt *Runtime) error {
 		"tool":          "rivr",
 		"version":       version.String(),
 		"schemaVersion": provider.SchemaVersion,
+		"conformance": map[string]any{
+			"spec": "agent-cli-guidelines", "version": version.Spec, "level": "Full",
+		},
 		"commands":      nodeToMap(k.Model.Node),
 		"exit_codes":    errs.Table(),
 		"providers":     provider.Names(),

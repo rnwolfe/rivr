@@ -239,6 +239,11 @@
       }
     ]
   },
+  "conformance": {
+    "level": "Full",
+    "spec": "agent-cli-guidelines",
+    "version": "0.4.0"
+  },
   "exit_codes": {
     "auth_required": 4,
     "cancelled": 130,
