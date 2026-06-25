@@ -46,7 +46,7 @@ change, in the **same PR**:
 
 1. Update the affected docs page under `site/src/content/docs/` (and the repo `docs/backends.md` if the matrix changed).
 2. Update the **landing** copy/examples in `site/src/pages/index.astro` (hero, comparisons, backend matrix) and the README's mirrored matrix.
-3. **Regenerate OG cards** if any page title/headline changed: `cd site && node scripts/gen-og.mjs` (keep the page list in `scripts/gen-og.mjs` and the `known` list in `src/components/Head.astro` in sync).
+3. **Regenerate OG cards** if any page title/headline changed: `cd site && node scripts/gen-og.mjs` (keep the page list in `scripts/gen-og.mjs` and the `known` list in `src/components/Head.astro` in sync). If the brand/tagline/headline command changed, also regenerate the GitHub social-preview card: `cd site && node scripts/gen-social.mjs` → `.github/social-preview.png` (re-upload in repo Settings → Social preview).
 4. Rebuild (`cd site && pnpm build`) so `llms.txt` regenerates, and keep the embedded `internal/skill/SKILL.md` aligned (it's the agent contract shipped in the binary).
 
 Build/preview the site: `cd site && pnpm build` / `pnpm dev` (binds 0.0.0.0). Deploy is Vercel.
