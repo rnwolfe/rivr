@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	neturl "net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -20,10 +21,34 @@ const ttl = 24 * time.Hour
 
 // apiURL is the GitHub "latest release" endpoint; overridable via env for tests.
 func apiURL() string {
-	if v := os.Getenv("RIVR_UPDATE_URL"); v != "" {
+	if v := safeReleaseURL(os.Getenv("RIVR_UPDATE_URL")); v != "" {
 		return v
 	}
 	return "https://api.github.com/repos/rnwolfe/rivr/releases/latest"
+}
+
+// safeReleaseURL allows a RIVR_UPDATE_URL override only over https (any host) or http to
+// localhost (for tests). A misconfigured/hostile env var (file://, http://169.254.169.254, …)
+// is ignored — the version check falls back to the default — so the override can't be used for
+// SSRF or local-file reads. Returns "" for empty/disallowed input.
+func safeReleaseURL(raw string) string {
+	if raw == "" {
+		return ""
+	}
+	u, err := neturl.Parse(raw)
+	if err != nil {
+		return ""
+	}
+	switch u.Scheme {
+	case "https":
+		return raw
+	case "http":
+		switch u.Hostname() {
+		case "localhost", "127.0.0.1", "::1":
+			return raw
+		}
+	}
+	return ""
 }
 
 // UpgradeHint is the command(s) a human runs to upgrade. rivr can't reliably detect the

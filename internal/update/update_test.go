@@ -8,6 +8,29 @@ import (
 	"time"
 )
 
+func TestSafeReleaseURL(t *testing.T) {
+	cases := []struct {
+		raw  string
+		want string
+	}{
+		{"", ""},
+		{"https://api.github.com/repos/x/y/releases/latest", "https://api.github.com/repos/x/y/releases/latest"},
+		{"https://evil.example/whatever", "https://evil.example/whatever"}, // https any host allowed
+		{"http://127.0.0.1:8080/x", "http://127.0.0.1:8080/x"},             // localhost http allowed (tests)
+		{"http://localhost/x", "http://localhost/x"},
+		{"http://[::1]:9/x", "http://[::1]:9/x"},
+		{"http://169.254.169.254/latest/meta-data", ""}, // cloud metadata SSRF → ignored
+		{"http://example.com/x", ""},                    // non-localhost http → ignored
+		{"file:///etc/passwd", ""},                      // local file → ignored
+		{"ftp://host/x", ""},                            // disallowed scheme → ignored
+	}
+	for _, c := range cases {
+		if got := safeReleaseURL(c.raw); got != c.want {
+			t.Errorf("safeReleaseURL(%q)=%q want %q", c.raw, got, c.want)
+		}
+	}
+}
+
 func TestNewer(t *testing.T) {
 	cases := []struct {
 		a, b string

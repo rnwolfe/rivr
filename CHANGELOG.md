@@ -6,6 +6,23 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-25
+
+### Added
+- **Agent CLI Guidelines v0.4.0 conformance**: `rivr schema` now emits a machine-verifiable
+  `conformance` block `{ spec, version, level: "Full" }`, and the README pins the badge plus a
+  Conformance statement. Backed by `const Spec = "0.4.0"` in `internal/version`.
+- `rivr version --check` (pull-based release check returning
+  `{current, latest, updateAvailable, upgrade}`) sends a `User-Agent` on the GitHub request
+  (GitHub's REST API rejects UA-less requests) and surfaces non-200 responses as errors.
+
+### Security
+- **SSRF override-guard on the version check**: the `RIVR_UPDATE_URL` override is now constrained
+  to `https://` (any host) or `http://` to localhost only (`localhost`/`127.0.0.1`/`::1`, for
+  tests). A disallowed or hostile value (`file://`, `http://169.254.169.254`, …) is ignored and
+  the check falls back to the default GitHub endpoint — the override can no longer be used for
+  SSRF or local-file reads.
+
 ## [0.3.1] - 2026-06-25
 
 ### Added
@@ -80,7 +97,8 @@ All notable changes to this project are documented here. The format is based on
 - Disclosed, opt-out built-in Amazon Associates tag on product deep links
   (`--associate-tag` / `--no-associate-tag`).
 
-[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.4.0
 [0.3.1]: https://github.com/rnwolfe/rivr/releases/tag/v0.3.1
 [0.3.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.2.0
