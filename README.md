@@ -137,8 +137,18 @@ Full table: `rivr schema`.
 
 rivr conforms to the [Agent CLI Guidelines](https://aclig.dev/) **v0.4.0** at the **Full**
 level. The contract version is machine-verifiable from the binary — `rivr schema` emits a
-`conformance` block (`{ spec: "agent-cli-guidelines", version: "0.4.0", level: "Full" }`),
-so an agent can confirm the standard it was built against without trusting this README.
+`conformance` block, so an agent can confirm the standard it was built against without
+trusting this README:
+
+```json
+{
+  "conformance": {
+    "level": "Full",
+    "spec": "agent-cli-guidelines",
+    "version": "0.4.0"
+  }
+}
+```
 
 ## Affiliate attribution (how rivr is funded)
 
