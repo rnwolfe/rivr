@@ -114,7 +114,11 @@ rivr auth login|status|logout|refresh
 rivr doctor                  # diagnostics
 rivr schema                  # machine-readable command tree, flags, exit codes, safety
 rivr agent                   # print the embedded agent guide (SKILL.md)
+rivr version [--check]       # installed version; --check pulls GitHub for the latest release
 ```
+
+> rivr never auto-updates. On the human path it prints a once-a-day upgrade hint to stderr
+> (silent for agents; disable with `RIVR_NO_UPDATE_CHECK=1`).
 
 Global flags: `--json`/`--format json|plain|tsv`, `--select a,b.c`, `--limit N`, `--detailed`,
 `--provider`, `--associate-tag`/`--no-associate-tag`, `--no-wrap-untrusted`, `--no-input`.

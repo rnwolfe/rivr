@@ -3,6 +3,8 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -253,6 +255,28 @@ func TestSearchBadges(t *testing.T) {
 	out, _, _ := run(t, "search", "x", "--json")
 	if !strings.Contains(out, "Amazon's Choice") {
 		t.Fatalf("expected a badge in search output:\n%s", out)
+	}
+}
+
+func TestVersionCheck(t *testing.T) {
+	noColor(t)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"tag_name":"v999.0.0"}`))
+	}))
+	defer srv.Close()
+	t.Setenv("RIVR_UPDATE_URL", srv.URL)
+	out, _, code := run(t, "version", "--check", "--json")
+	if code != 0 {
+		t.Fatalf("exit = %d, want 0\n%s", code, out)
+	}
+	var res map[string]any
+	if err := json.Unmarshal([]byte(out), &res); err != nil {
+		t.Fatal(err)
+	}
+	// The test binary reports a dev version (so updateAvailable is false by design — dev
+	// builds are never nagged); assert the network check ran and surfaced the latest tag.
+	if res["latest"] != "v999.0.0" {
+		t.Fatalf("expected latest v999.0.0 from the endpoint: %s", out)
 	}
 }
 

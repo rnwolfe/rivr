@@ -2,6 +2,7 @@ package cli
 
 import (
 	"os"
+	"time"
 
 	"github.com/alecthomas/kong"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/rnwolfe/rivr/internal/errs"
 	"github.com/rnwolfe/rivr/internal/provider"
 	"github.com/rnwolfe/rivr/internal/skill"
+	"github.com/rnwolfe/rivr/internal/update"
 	"github.com/rnwolfe/rivr/internal/version"
 )
 
@@ -65,6 +67,7 @@ func (c *DoctorCmd) Run(rt *Runtime) error {
 	checks = append(checks,
 		map[string]any{"name": "wrap_untrusted", "ok": rt.Cfg.WrapUntrusted, "detail": "prompt-injection fencing enabled"},
 		map[string]any{"name": "affiliate", "ok": true, "detail": affDetail},
+		map[string]any{"name": "update", "ok": true, "detail": updateDetail(rt)},
 	)
 
 	allOK := true
@@ -87,6 +90,20 @@ func credDetail(provider string, configured bool) string {
 		return provider + " credentials present (" + auth.Backend() + ")"
 	}
 	return "no credentials; run `rivr auth login --provider " + provider + "`"
+}
+
+// updateDetail reports release freshness for doctor (uses the 24h cache; never fails doctor).
+func updateDetail(rt *Runtime) string {
+	cur := version.String()
+	latest, avail, err := update.Check(rt.Ctx, cur, false, time.Now())
+	switch {
+	case err != nil:
+		return "could not check (offline?); installed " + cur
+	case avail:
+		return cur + " installed; " + latest + " available — " + update.UpgradeHint
+	default:
+		return cur + " (up to date)"
+	}
 }
 
 func itoa(n int) string {
@@ -195,8 +212,25 @@ func (c *AgentCmd) Run(rt *Runtime) error {
 
 // --- version ----------------------------------------------------------------
 
-type VersionCmd struct{}
+type VersionCmd struct {
+	Check bool `help:"Check GitHub for a newer release (network)."`
+}
 
 func (c *VersionCmd) Run(rt *Runtime) error {
-	return rt.Out.Emit(map[string]any{"version": version.String()})
+	cur := version.String()
+	if !c.Check {
+		return rt.Out.Emit(map[string]any{"version": cur})
+	}
+	latest, avail, err := update.Check(rt.Ctx, cur, true, time.Now())
+	out := map[string]any{"current": cur, "updateAvailable": false}
+	if err != nil {
+		out["error"] = "could not reach the release endpoint: " + err.Error()
+		return rt.Out.Emit(out)
+	}
+	out["latest"] = latest
+	out["updateAvailable"] = avail
+	if avail {
+		out["upgrade"] = update.UpgradeHint
+	}
+	return rt.Out.Emit(out)
 }

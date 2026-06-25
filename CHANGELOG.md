@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-25
+
+### Added
+- `rivr version --check` — a pull-based release check returning
+  `{current, latest, updateAvailable, upgrade}`.
+- A passive, cached (24h) upgrade notice on the **human TTY path** (stderr) — **silent for
+  agents** (`--json`/non-TTY/`--no-input`); disable with `RIVR_NO_UPDATE_CHECK=1`.
+- `doctor` reports update status.
+
+### Notes
+- rivr **never auto-updates** and never instructs an agent to update its own binary; it only
+  surfaces the upgrade command to a human (mutating tooling mid-task breaks determinism).
+
 ## [0.2.0] - 2026-06-25
 
 ### Added
@@ -55,7 +68,8 @@ All notable changes to this project are documented here. The format is based on
 - Disclosed, opt-out built-in Amazon Associates tag on product deep links
   (`--associate-tag` / `--no-associate-tag`).
 
-[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.2.0
 [0.1.3]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.3
 [0.1.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.0

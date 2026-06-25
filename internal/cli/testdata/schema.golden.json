@@ -228,6 +228,12 @@
         "name": "agent"
       },
       {
+        "flags": [
+          {
+            "help": "Check GitHub for a newer release (network).",
+            "name": "check"
+          }
+        ],
         "help": "Print the version.",
         "name": "version"
       }

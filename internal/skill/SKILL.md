@@ -99,6 +99,14 @@ wasting a credit. Both `RATE_LIMITED` and `BLOCKED` errors carry `retryAfterSeco
 to schedule the retry. Transient 5xx/network → `RETRYABLE` (exit 8, already retried with
 backoff). An unexpected/changed upstream response → `UPSTREAM_ERROR`/`SCHEMA_DRIFT` (exit 9).
 
+## Staying current
+`rivr version --check` reports `{current, latest, updateAvailable, upgrade}` (a network pull) —
+the agent-safe way to ask "am I current?". On the human TTY path rivr also prints a one-line
+upgrade notice to stderr at most once/24h (cached); it is **silent in `--json`/non-TTY/
+`--no-input`** and can be turned off with `RIVR_NO_UPDATE_CHECK=1`. rivr **never auto-updates**.
+If you (an agent) see an update is available, surface the `upgrade` command **to the human** —
+do not run it yourself mid-task (mutating your own tooling breaks determinism and may fail).
+
 ## Untrusted content (prompt-injection)
 Product titles, descriptions, bullet features, and review titles/bodies are
 attacker-controllable. They are **fenced as untrusted by default** — wrapped in

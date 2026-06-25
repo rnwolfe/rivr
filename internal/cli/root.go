@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/alecthomas/kong"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/rnwolfe/rivr/internal/fence"
 	"github.com/rnwolfe/rivr/internal/output"
 	"github.com/rnwolfe/rivr/internal/provider"
+	"github.com/rnwolfe/rivr/internal/update"
 	"github.com/rnwolfe/rivr/internal/version"
 )
 
@@ -214,7 +216,25 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if err := kctx.Run(rt); err != nil {
 		return emitError(rt, err)
 	}
+	maybeNotifyUpdate(rt)
 	return errs.ExitOK
+}
+
+// maybeNotifyUpdate prints a one-line upgrade notice to STDERR — but only on the human path
+// (interactive TTY, plain format), never for agents (JSON/non-TTY/--no-input) and never if
+// RIVR_NO_UPDATE_CHECK=1. It uses the 24h cache, so it costs nothing on most invocations and
+// at most one ~2s GitHub call per day, AFTER the command's output is already written.
+func maybeNotifyUpdate(rt *Runtime) {
+	if rt.Out.Format != output.FormatPlain || rt.Cfg.NoInput ||
+		os.Getenv("RIVR_NO_UPDATE_CHECK") == "1" || !isTTY(rt.Out.Stdout) {
+		return
+	}
+	latest, avail, err := update.Check(rt.Ctx, version.String(), false, time.Now())
+	if err != nil || !avail {
+		return
+	}
+	rt.Out.Info("note: a new rivr release is available (%s → %s). Upgrade: %s",
+		version.String(), latest, update.UpgradeHint)
 }
 
 func newRuntime(cfg *CLI, stdin io.Reader, stdout, stderr io.Writer) *Runtime {

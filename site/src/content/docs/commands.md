@@ -42,7 +42,7 @@ rivr auth login|status|logout|refresh
 rivr doctor              # diagnostics
 rivr schema              # command tree, flags, exit codes, providers, live safety state
 rivr agent               # print the embedded agent guide (SKILL.md)
-rivr version
+rivr version             # installed version (--check pulls GitHub for the latest release)
 ```
 
 ## Exit codes

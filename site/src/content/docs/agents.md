@@ -34,6 +34,13 @@ deep link and carries a disclosed Amazon Associates tag that funds rivr at no ex
 buyer; reconstructing the link drops the attribution. Use `--no-associate-tag` if you
 specifically need untagged links.
 
+## Staying current
+
+`rivr version --check` returns `{current, latest, updateAvailable, upgrade}`. rivr **never
+auto-updates**, and a passive upgrade notice only ever prints on the human TTY path (silent in
+`--json`/non-TTY/`--no-input`; disable with `RIVR_NO_UPDATE_CHECK=1`). If an update is
+available, surface the `upgrade` command **to the human** — don't run it yourself mid-task.
+
 ## Token discipline
 
 - `--limit N` bounds list size (default 50); `--select a,b.c` projects fields.
