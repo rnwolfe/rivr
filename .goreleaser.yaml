@@ -35,23 +35,26 @@ checksum:
 sboms:
   - artifacts: archive
 
-# Homebrew cask → rnwolfe/homebrew-tap. Requires a GORELEASER_TOKEN secret on THIS repo:
-# a PAT with contents:write on the tap repo (the built-in GITHUB_TOKEN can't push there).
-homebrew_casks:
-  - repository:
+# Homebrew FORMULA → rnwolfe/homebrew-tap (Formula/rivr.rb). A formula (not a cask) so
+# `brew install rnwolfe/tap/rivr` works on BOTH macOS and Linux — casks are macOS-only, which
+# left Linux brew users unable to install. `brews:` is deprecated-but-functional in GoReleaser
+# v2 (emits a warning); it's the only built-in path to a cross-platform Homebrew artifact, and
+# it auto-generates the on_macos/on_linux + on_arm/on_intel blocks from the release archives.
+# Requires a GORELEASER_TOKEN secret (PAT with contents:write on the tap repo).
+brews:
+  - name: rivr
+    directory: Formula
+    repository:
       owner: rnwolfe
       name: homebrew-tap
       token: "{{ .Env.GORELEASER_TOKEN }}"
     homepage: "https://rivr.sh/"
-    # brew audit: no leading article, no trailing period.
     description: "Read-only Amazon Shopping CLI for AI agents"
-    # download domain (github.com) differs from the homepage domain (rivr.sh) → declare it verified.
-    url:
-      verified: "github.com/rnwolfe/rivr/"
-    # Unsigned binaries are Gatekeeper-quarantined on macOS; strip on install (modifier-if, one line, to satisfy brew style).
-    hooks:
-      post:
-        install: 'system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/rivr"] if OS.mac?'
+    license: "MIT"
+    install: |
+      bin.install "rivr"
+    test: |
+      system "#{bin}/rivr", "version"
 
 release:
   draft: false

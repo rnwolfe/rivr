@@ -6,11 +6,17 @@ All notable changes to this project are documented here. The format is based on
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-06-25
+
 ### Added
 - `install.sh` (served at `https://rivr.sh/install.sh`): `curl -fsSL https://rivr.sh/install.sh | sh`
   — detects os/arch, downloads the release tarball, **verifies its SHA-256** against
   `checksums.txt`, installs to `~/.local/bin` (or `$RIVR_INSTALL_DIR`). Function-wrapped for
-  truncation safety.
+  truncation safety. Now the primary install one-liner on the site/README.
+
+### Changed
+- **Homebrew is now a cross-platform formula** (`Formula/rivr.rb`) instead of a macOS-only
+  cask, so `brew install rnwolfe/tap/rivr` works on **Linux and macOS**.
 
 ## [0.3.0] - 2026-06-25
 
@@ -74,7 +80,8 @@ All notable changes to this project are documented here. The format is based on
 - Disclosed, opt-out built-in Amazon Associates tag on product deep links
   (`--associate-tag` / `--no-associate-tag`).
 
-[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/rnwolfe/rivr/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/rnwolfe/rivr/releases/tag/v0.3.1
 [0.3.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rnwolfe/rivr/releases/tag/v0.2.0
 [0.1.3]: https://github.com/rnwolfe/rivr/releases/tag/v0.1.3

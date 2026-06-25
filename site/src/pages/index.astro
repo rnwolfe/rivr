@@ -79,9 +79,10 @@ const backends = [
         <h1 class="reveal">A read-only Amazon Shopping CLI<br /><span class="grad">built for AI agents.</span></h1>
         <p class="lede reveal">Search products and pull detail, offers, reviews, and variations through <strong>one normalized schema</strong> over a pluggable backend — SerpApi, Rainforest, the official Creators API, or keyless scraping. <a href="https://aclig.dev/">Agent CLI Guidelines</a> baked in.</p>
         <div class="cta reveal">
-          <code class="install" id="install">go install github.com/rnwolfe/rivr/cmd/rivr@latest</code>
-          <button class="copy" data-copy="go install github.com/rnwolfe/rivr/cmd/rivr@latest" aria-label="Copy install command">copy</button>
+          <code class="install" id="install">curl -fsSL https://rivr.sh/install.sh | sh</code>
+          <button class="copy" data-copy="curl -fsSL https://rivr.sh/install.sh | sh" aria-label="Copy install command">copy</button>
         </div>
+        <p class="alt reveal">or <code>brew install rnwolfe/tap/rivr</code> · <code>go install github.com/rnwolfe/rivr/cmd/rivr@latest</code></p>
         <div class="links reveal">
           <a class="btn primary" href="/getting-started">Get started →</a>
           <a class="btn" href={repo}>Star on GitHub</a>
@@ -182,6 +183,8 @@ const backends = [
       .install { padding: .8rem 1rem; color: var(--rvr-paper); font-size: .92rem; white-space: nowrap; overflow-x: auto; }
       .copy { border: 0; border-left: 1px solid var(--rvr-line); background: var(--rvr-ink-700); color: var(--rvr-current); font-family: var(--rvr-font-mono); padding: 0 1.1rem; cursor: pointer; font-size: .85rem; }
       .copy:hover { background: var(--rvr-ink-600); }
+      .alt { font-family: var(--rvr-font-mono); font-size: .78rem; color: var(--rvr-fog); margin-top: .85rem; }
+      .alt code { color: var(--rvr-mist); }
       .links { display: flex; gap: .8rem; justify-content: center; margin-top: 1.6rem; flex-wrap: wrap; }
       .btn { border: 1px solid var(--rvr-line); border-radius: var(--rvr-radius); padding: .7rem 1.3rem; color: var(--rvr-paper); font-weight: 600; }
       .btn:hover { text-decoration: none; border-color: var(--rvr-current); }
