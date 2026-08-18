@@ -6,7 +6,7 @@ import Default from "@astrojs/starlight/components/Head.astro";
 
 const SITE = "https://rivr.sh";
 const known = ["getting-started", "backends", "auth", "commands", "agents"];
-const id = (Astro.props.entry?.id ?? "").replace(/\.(md|mdx)$/, "");
+const id = (Astro.locals.starlightRoute?.entry?.id ?? "").replace(/\.(md|mdx)$/, "");
 const og = `${SITE}/og/${known.includes(id) ? id : "default"}.png`;
 ---
 
